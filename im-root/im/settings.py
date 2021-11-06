@@ -40,8 +40,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
 
-    'master.apps.MasterConfig',
-    'sale.apps.SaleConfig',
+    'rest_framework',
+    'rest_framework.authtoken',
+
+    'django_registration',
+    'djoser',
+
+    'widget_tweaks',
+
+    'core',
+    'master',
+    'sale',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -62,7 +72,7 @@ ROOT_URLCONF = 'im.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates",],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -128,10 +138,30 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / 'static'
+]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+REGISTRATION_OPEN = False
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    )
+}

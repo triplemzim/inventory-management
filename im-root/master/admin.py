@@ -24,13 +24,20 @@ class stocksAdmin(admin.ModelAdmin):
     search_fields = ['product__product_name__name']
     list_filter = ('warehouse', 'product')
 
+class supplierAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+
+class bankAdmin(admin.ModelAdmin):
+    search_fields = ['name']
+
+
 admin.site.register(m_product_name, mProductName)
 admin.site.register(m_product, mProduct)
 admin.site.register(m_warehouse)
 admin.site.register(m_category, mCategory)
 admin.site.register(m_customer, mCustomer)
-admin.site.register(m_supplier)
-admin.site.register(m_bank)
+admin.site.register(m_supplier, supplierAdmin)
+admin.site.register(m_bank, bankAdmin)
 admin.site.register(warehouse_transfer)
 admin.site.register(stocks, stocksAdmin)
 admin.site.register(bank_transactions)

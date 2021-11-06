@@ -1,6 +1,15 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from rest_framework.routers import DefaultRouter
+from .views import *
+
+router = DefaultRouter()
+router.register('sales', SaleViewSets)
+router.register('productandquantity', ProductAndQuantityViewSets)
+router.register('payments', PaymentsViewSets)
+
+
 
 urlpatterns=[
-    path('sale/', views.saleHome, name='sale'),
+    path('', include(router.urls)),
 ]
