@@ -1,3 +1,4 @@
 /Lib/site-packages/
 /Scripts/
 /im-root/im/.env
+*.pyc
