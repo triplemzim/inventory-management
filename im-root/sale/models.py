@@ -44,7 +44,7 @@ class sale(models.Model):
     customer = models.ForeignKey(m_customer, null=True, blank=True, on_delete=models.SET_NULL, related_name='sale')
     name = models.CharField(max_length=50, null=False, blank=False)
     contact = models.CharField(max_length=20, null=False, blank=False)
-    address = models.CharField(max_length=200, null=False, blank=False)
+    address = models.CharField(max_length=200, null=True, blank=True)
     warehouse = models.ForeignKey(m_warehouse, null=False, blank=False, default='Main Warehouse',
                                   on_delete=models.CASCADE, related_name='sale')
     invoice_no = models.CharField(max_length=200, unique=True, blank=False, null=False)

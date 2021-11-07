@@ -38,6 +38,7 @@ class m_product(models.Model):
     default_sales_price = models.FloatField(default=0, null=False, blank=False)
     minimum_quantity = models.FloatField(default=0, null=False, blank=False)
     barcode = models.BigIntegerField(null=False, blank=False, primary_key=True)
+    photo = models.ImageField(null=True, blank=True)
 
     def __str__(self):
         categoryName = ''
@@ -159,3 +160,5 @@ class bank_transactions(models.Model):
     class Meta:
         verbose_name = 'Bank Transaction'
         verbose_name_plural = 'Bank Transactions'
+
+

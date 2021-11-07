@@ -69,3 +69,9 @@ class StocksList(generics.ListAPIView):
 class BankTransactionsList(generics.ListAPIView):
     serializer_class = BankTransactionSerializer
     queryset = bank_transactions.objects.all()
+
+class StockListProduct(generics.ListAPIView):
+    serializer_class = StocksSerializer
+    def get_queryset(self):
+        barcode = self.kwargs.get('barcode')
+        return stocks.objects.filter(product = barcode)

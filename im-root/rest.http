@@ -4,11 +4,10 @@
 
 ### Variables
 @host=http://127.0.0.1:8000
-@username=neo
+@username=admin
 @email=neo@the.matrix
-@password=always-use-strong-passwords-in-production
-@token=9eeb50ee6bd81a3d4dc95d013b5df45aa339f8c7
-
+@password=admin
+@token=40cf1aaa23cfa93be61b43bd9f9d73b67d270c77
 
 
 ### Create new account
@@ -38,3 +37,6 @@ POST {{host}}/auth/token/logout/
 Authorization: Token {{token}}
 
 
+### Get Customer
+GET {{host}}/master/customer-list
+Authorization: Token {{{{token}}}}

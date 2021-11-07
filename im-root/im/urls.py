@@ -33,5 +33,5 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
 
-    # re_path(r'^.*$', IndexTemplateView.as_view(), name='spa-entry-point'),
+    re_path(r'^.*$', IndexTemplateView.as_view(), name='spa-entry-point'),
 ]
