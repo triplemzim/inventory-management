@@ -19,12 +19,18 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return super(WarehouseSerializer, self).to_representation(instance)
+
     class Meta:
         model = m_warehouse
         fields = '__all__'
 
 
 class CustomerSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return super(CustomerSerializer, self).to_representation(instance)
+
     class Meta:
         model = m_customer
         fields = '__all__'

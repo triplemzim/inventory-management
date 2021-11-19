@@ -6,7 +6,7 @@ export const getCustomerList = async () => {
         return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
-        alert(e.response.statusText);
+        alert(JSON.stringify(e.response.data));
     }
     return {};
 }
@@ -17,7 +17,7 @@ export const getProductList = async () => {
         return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
-        alert(e.response.statusText);
+        alert(JSON.stringify(e.response.data));
     }
     return {};
 }
@@ -28,7 +28,7 @@ export const getProductListWithBarcode = async (barcode) => {
         return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
-        alert(e.response.statusText);
+        alert(JSON.stringify(e.response.data));
     }
     return {};
 }
@@ -39,7 +39,7 @@ export const getStockListWithBarcode = async (barcode) => {
         return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
-        alert(e.response.statusText);
+        alert(JSON.stringify(e.response.data));
     }
     return {};
 }
@@ -50,7 +50,7 @@ export const getWarehouseList = async () => {
         return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
-        alert(e.response.statusText);
+        alert(JSON.stringify(e.response.data));
     }
     return {};
 }
@@ -60,7 +60,8 @@ export const postSale = async (payload) => {
     try {
         return await axios.post(endpoint, payload);
     } catch (e) {
-        console.log(e.response);
-        alert(e.response.statusText);
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
     }
 }

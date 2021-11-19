@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from .models import *
 from master.models import stocks
-from master.serializers import StocksSerializer
+from master.serializers import StocksSerializer, CustomerSerializer, WarehouseSerializer
 from django.db import DatabaseError, transaction
 from django.db.models import F
+from django.http import HttpResponse
 
 
 class ProductAndQuantitySerializer(serializers.ModelSerializer):
@@ -25,6 +26,10 @@ class SaleSerializer(serializers.ModelSerializer):
         model = sale
         fields = '__all__'
 
+    def to_representation(self, instance):
+        self.fields['customer'] = CustomerSerializer(read_only=True)
+        self.fields['warehouse'] = WarehouseSerializer(read_only=True)
+        return super(SaleSerializer, self).to_representation(instance)
 
 
     def create(self, validated_data):
@@ -32,6 +37,8 @@ class SaleSerializer(serializers.ModelSerializer):
             print(productAndQuantity)
             print(warehouseId)
             stock = stocks.objects.filter(warehouse=warehouseId, product=productAndQuantity.product).first()
+            if stock.quantity < productAndQuantity.quantity:
+                raise DatabaseError(str(productAndQuantity.product) + ' is low in Stock. Available: ' + str(stock.quantity))
             stock.quantity = F('quantity') - productAndQuantity.quantity
             stock.save()
 
@@ -50,8 +57,9 @@ class SaleSerializer(serializers.ModelSerializer):
                     sales.payment.add(temp)
 
                 return sales
-        except DatabaseError:
-            return DatabaseError("Can't make atomic transaction for Sale")
+        except Exception as e:
+            error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
+            raise serializers.ValidationError(error)
 
 
 
