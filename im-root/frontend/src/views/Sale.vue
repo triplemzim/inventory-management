@@ -1,4 +1,4 @@
-/* eslint-disable */
+Home.vue/* eslint-disable */
 <script>
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";

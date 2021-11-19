@@ -3,7 +3,7 @@ import { axios } from "@/common/api.service";
 export const getCustomerList = async () => {
     const endpoint = '/master/customer-list/';
     try{
-        return await axios.get(endpoint)
+        return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
         alert(e.response.statusText);
@@ -14,7 +14,7 @@ export const getCustomerList = async () => {
 export const getProductList = async () => {
     const endpoint = '/master/product-list/';
     try{
-        return await axios.get(endpoint)
+        return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
         alert(e.response.statusText);
@@ -25,7 +25,7 @@ export const getProductList = async () => {
 export const getProductListWithBarcode = async (barcode) => {
     const endpoint = '/master/product-barcode/' + barcode + '/';
     try{
-        return await axios.get(endpoint)
+        return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
         alert(e.response.statusText);
@@ -36,10 +36,31 @@ export const getProductListWithBarcode = async (barcode) => {
 export const getStockListWithBarcode = async (barcode) => {
     const endpoint = '/master/stocks-list/' + barcode + '/';
     try{
-        return await axios.get(endpoint)
+        return await axios.get(endpoint);
     } catch (e) {
         console.log(e.response);
         alert(e.response.statusText);
     }
     return {};
+}
+
+export const getWarehouseList = async () => {
+    const endpoint = '/master/warehouse-list/';
+    try{
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response);
+        alert(e.response.statusText);
+    }
+    return {};
+}
+
+export const postSale = async (payload) => {
+    const endpoint = '/sale/sales/';
+    try {
+        return await axios.post(endpoint, payload);
+    } catch (e) {
+        console.log(e.response);
+        alert(e.response.statusText);
+    }
 }

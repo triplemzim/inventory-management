@@ -1,8 +1,18 @@
 from rest_framework import serializers
 from master.models import *
 
+class ProductNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = m_product_name
+        fields = '__all__'
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = m_category
+        fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
+    product_name = ProductNameSerializer()
+    category = CategorySerializer()
     class Meta:
         model = m_product
         exclude = ['minimum_quantity']
