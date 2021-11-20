@@ -11,6 +11,17 @@ export const getCustomerList = async () => {
     return {};
 }
 
+export const getSupplierList = async () => {
+    const endpoint = '/master/supplier-list/';
+    try{
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response);
+        alert(JSON.stringify(e.response.data));
+    }
+    return {};
+}
+
 export const getProductList = async () => {
     const endpoint = '/master/product-list/';
     try{
@@ -57,6 +68,17 @@ export const getWarehouseList = async () => {
 
 export const postSale = async (payload) => {
     const endpoint = '/sale/sales/';
+    try {
+        return await axios.post(endpoint, payload);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
+
+export const postPurchase = async (payload) => {
+    const endpoint = '/sale/purchase/';
     try {
         return await axios.post(endpoint, payload);
     } catch (e) {

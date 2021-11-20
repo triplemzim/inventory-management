@@ -163,6 +163,8 @@ export default {
       if (idx !== -1) this.productTable.splice(idx, 1);
       if (row.quantity === 0) return;
       this.productTable.push(row);
+      this.paymentReceived = this.getGrandTotal();
+
       console.log('table', ...this.productTable);
 
       this.resetProduct();
@@ -367,7 +369,7 @@ export default {
                       </div>
                     </div>
                     <div class="product-button">
-                      <button class="btn btn-success" type="button" @click="addProduct()">Add Product</button>
+                      <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                     </div>
                   </div>
                 </div>

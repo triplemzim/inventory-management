@@ -18,6 +18,12 @@ class productAndQuantityAdmin(admin.ModelAdmin):
     search_fields = ['product']
     autocomplete_fields = ['product']
 
+class purchaseAdmin(admin.ModelAdmin):
+    list_display = ('name', 'invoice_no', 'payment_paid_gt', 'payment_due_gt')
+    list_filter = ('warehouse',)
+    search_fields = ['invoice_no', 'name', 'address', 'contact']
+
 admin.site.register(payments, paymentModel)
 admin.site.register(sale, saleAdmin)
 admin.site.register(productAndQuantity, productAndQuantityAdmin)
+admin.site.register(purchase, purchaseAdmin)

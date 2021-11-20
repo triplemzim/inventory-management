@@ -3,7 +3,7 @@
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {getCustomerList, getProductList, getWarehouseList, postSale} from "@/common/apis";
+import {getSupplierList, getProductList, getWarehouseList, postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 
 export default {
@@ -12,10 +12,10 @@ export default {
     // AutoComplete
   },
   setup() {
-    const customerList = ref(null);
-    const rawCustomerList = ref(null);
+    const supplierList = ref(null);
+    const rawSupplierList = ref(null);
     const rawProductList = ref(null);
-    const selectedCustomer = ref('');
+    const selectedSupplier = ref('');
     const componentName = ':home:';
     const productList = ref(null);
     const address = ref(null);
@@ -31,7 +31,7 @@ export default {
     const due = ref(null);
     const invoiceData = ref([]);
     const productName = ref(null);
-    const customerName = ref(null);
+    const supplierName = ref(null);
     const paymentReceived = ref(null);
     const productImage = ref(null);
     const warehouseList = ref(null);
@@ -47,17 +47,17 @@ export default {
       //DatePicker
       jq("#warhouseDatepicker").datepicker();
 
-      // Customer list
-      let response = await getCustomerList();
-      console.log(componentName, 'api-customer-list', response.data);
-      response.data.forEach(customer => {
+      // Supplier list
+      let response = await getSupplierList();
+      console.log(componentName, 'api-supplier-list', response.data);
+      response.data.forEach(supplier => {
         const temp = {};
-        temp.value = customer.name;
-        temp.id = customer.contact;
+        temp.value = supplier.name;
+        temp.id = supplier.contact;
         returnData.push(temp);
       });
-      rawCustomerList.value = response.data;
-      customerList.value = returnData;
+      rawSupplierList.value = response.data;
+      supplierList.value = returnData;
 
       //Product-List
       const productData = [];
@@ -83,8 +83,8 @@ export default {
     });
 
     return {
-      customerList,
-      selectedCustomer,
+      supplierList,
+      selectedSupplier,
       componentName,
       COMPANY_NAME,
       productList,
@@ -101,22 +101,22 @@ export default {
       due,
       invoiceData,
       productName,
-      customerName,
+      supplierName,
       paymentReceived,
       productImage,
       warehouseList,
       rawProductList,
-      rawCustomerList,
+      rawSupplierList,
       productTable,
     }
   },
   methods: {
-    handleSelectCustomer: function (customer) {
-      if (customer == null) return;
-      this.selectedCustomer = this.rawCustomerList.find(x => x.contact === customer.id);
-      this.customerName = this.selectedCustomer.name;
-      this.address = this.selectedCustomer.address;
-      this.contact = this.selectedCustomer.contact;
+    handleSelectSupplier: function (supplier) {
+      if (supplier == null) return;
+      this.selectedSupplier = this.rawSupplierList.find(x => x.contact === supplier.id);
+      this.supplierName = this.selectedSupplier.name;
+      this.address = this.selectedSupplier.address;
+      this.contact = this.selectedSupplier.contact;
     },
     handleSelectProduct: function (event) {
       console.log(this.componentName, event.target.value);
@@ -129,7 +129,7 @@ export default {
       this.productImage = selectedProduct.photo;
       this.barcode = selectedProduct.barcode;
       this.quantity = 1;
-      this.price = selectedProduct.default_sales_price;
+      this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
     },
@@ -141,7 +141,7 @@ export default {
       this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
       this.productImage = selectedProduct.photo;
       this.quantity = 1;
-      this.price = selectedProduct.default_sales_price;
+      this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
     },
@@ -161,8 +161,12 @@ export default {
       row.barcode = this.barcode;
       const idx = this.productTable.findIndex(x => x.productName === row.productName);
       if (idx !== -1) this.productTable.splice(idx, 1);
-      if (row.quantity === 0) return;
+      if (row.quantity === 0) {
+        this.resetProduct();
+        return;
+      }
       this.productTable.push(row);
+      this.paymentReceived = this.getGrandTotal();
       console.log('table', ...this.productTable);
 
       this.resetProduct();
@@ -175,7 +179,7 @@ export default {
     getAmountDue: function () {
       // return Number.parseFloat(this.getGrandTotal() - this.paymentReceived).toFixed(2);
       let due = this.getGrandTotal() - this.paymentReceived;
-      if (due != null) due = Number.parseFloat(due);
+      if (due != null) due = Number.parseFloat(due).toFixed(2);
       return due;
     },
     resetProduct: function () {
@@ -198,38 +202,38 @@ export default {
       this.barcode = row.barcode;
       this.totalPrice = this.getTotalPrice();
     },
-    submitSale: async function () {
-      if (!confirm("Do you confirm to submit Sale?")) {
+    submitPurchase: async function () {
+      if (!confirm("Do you confirm to submit Purchase?")) {
         return;
       }
-      if (this.isValidSale() == false) return;
+      if (this.isValidPurchase() == false) return;
       // basic info
       const requestBody = {};
-      requestBody.name = this.customerName;
+      requestBody.name = this.supplierName;
       requestBody.contact = this.contact;
       requestBody.address = this.address;
       requestBody.invoice_no = this.invoiceNo;
-      requestBody.payment_received_gt = this.paymentReceived;
+      requestBody.payment_paid_gt = this.paymentReceived;
       requestBody.payment_due_gt = this.getAmountDue();
       requestBody.date = this.dateSelected;
-      if (this.selectedCustomer != null) {
-        requestBody.customer = this.selectedCustomer.id;
+      if (this.selectedSupplier != null) {
+        requestBody.supplier = this.selectedSupplier.id;
       }
       requestBody.warehouse = this.warehouse;
 
       // Payment
       const payment = [];
       const onePayment = {};
-      onePayment.debit_or_credit = "DEBIT";
+      onePayment.debit_or_credit = "CREDIT";
       onePayment.amount = this.getGrandTotal();
       onePayment.date = this.dateSelected;
       onePayment.payment_type = "CASH";
       onePayment.invoice_no = this.invoiceNo;
-      if (this.selectedCustomer != null) {
-        onePayment.customer = this.selectedCustomer.id;
+      if (this.selectedSupplier != null) {
+        onePayment.supplier = this.selectedSupplier.id;
       }
       payment.push(onePayment);
-      requestBody.payment = payment;
+      requestBody.p_payment = payment;
 
       // Products
       const productList = [];
@@ -243,13 +247,13 @@ export default {
         productList.push(temp);
       });
       requestBody.productAndQuantity = productList;
-      console.log(this.componentName, 'sale-payload: ', JSON.stringify(requestBody));
-      const response = await postSale(requestBody);
+      console.log(this.componentName, 'purchase-payload: ', JSON.stringify(requestBody));
+      const response = await postPurchase(requestBody);
       if (response.status === 201) {
-        alert('Sale Record Complete!');
+        alert('Purchase Record Complete!');
       }
     },
-    isValidSale: function () {
+    isValidPurchase: function () {
       if (this.productTable.length == 0) {
         alert('Please add some product!');
         return false;
@@ -262,35 +266,35 @@ export default {
 
 <template>
   <div class="containerRoot" id="home">
-    <section class="customer">
+    <section class="supplier">
       <div class="container">
         <div class="row">
           <div class="col-lg-6">
             <div class="sticky-top">
-              <form @submit.prevent="submitSale">
-                <div class="customer-information">
-                  <h3>Customer</h3>
-                  <div class="customer-info-box">
+              <form @submit.prevent="submitPurchase">
+                <div class="supplier-information">
+                  <h3>Supplier</h3>
+                  <div class="supplier-info-box">
                     <div class="form-group row">
-                      <AutoComplete :dataList="customerList" :title="'Search Customer'"
-                                    @selectedData="handleSelectCustomer" key="customer"/>
+                      <AutoComplete :dataList="supplierList" :title="'Search Supplier'"
+                                    @selectedData="handleSelectSupplier" key="supplier"/>
                     </div>
                     <div class="form-group row">
-                      <label for="customerAddress" class="col-lg-4 col-form-label">Customer Name</label>
+                      <label for="supplierAddress" class="col-lg-4 col-form-label">Supplier Name</label>
                       <div class="col-lg-8">
-                        <input type="text" required class="form-control" id="customerName" v-model="customerName">
+                        <input type="text" required class="form-control" id="supplierName" v-model="supplierName">
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label for="customerAddress" class="col-lg-4 col-form-label">Address</label>
+                      <label for="supplierAddress" class="col-lg-4 col-form-label">Address</label>
                       <div class="col-lg-8">
-                        <input type="text" class="form-control" id="customerAddress" v-model="address">
+                        <input type="text" class="form-control" id="supplierAddress" v-model="address">
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label for="customerContact" class="col-lg-4 col-form-label">Contact</label>
+                      <label for="supplierContact" class="col-lg-4 col-form-label">Contact</label>
                       <div class="col-lg-8">
-                        <input type="text" required class="form-control" id="customerContact" v-model="contact">
+                        <input type="text" required class="form-control" id="supplierContact" v-model="contact">
                       </div>
                     </div>
                   </div>
@@ -367,7 +371,7 @@ export default {
                       </div>
                     </div>
                     <div class="product-button">
-                      <button class="btn btn-success" type="button" @click="addProduct()">Add Product</button>
+                      <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                     </div>
                   </div>
                 </div>
@@ -425,7 +429,7 @@ export default {
                 <div class="invoice-info">
                   <div class="row">
                     <div class="col-lg-6">
-                      <p><strong>Customer Name:</strong> {{ customerName }}</p>
+                      <p><strong>Supplier Name:</strong> {{ supplierName }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Invoice Number:</strong> {{ invoiceNo }}</p>
@@ -550,19 +554,19 @@ export default {
 
 <style>
 /*
-===== Customer Page CSS ==========
+===== Supplier Page CSS ==========
 */
 body,
 html {
   height: 100%;
 }
 
-.customer {
+.supplier {
   padding: 50px 0;
 }
 
 
-.customer-info-box,
+.supplier-info-box,
 .product-info-box,
 .invoice-info-box,
 .warehouse-info-box {
@@ -572,13 +576,13 @@ html {
   border-radius: 5px;
 }
 
-.customer-info-box .form-group,
+.supplier-info-box .form-group,
 .product-info-box .form-group,
 .warehouse-info-box .form-group {
   margin-bottom: 10px;
 }
 
-.customer-info-box .form-group label {
+.supplier-info-box .form-group label {
   font-weight: 500;
 }
 
@@ -614,7 +618,7 @@ html {
   margin-bottom: 10px;
 }
 
-.customer .fixed-top {
+.supplier .fixed-top {
   top: 50px !important;
 }
 

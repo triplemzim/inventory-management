@@ -92,6 +92,7 @@ class purchase(models.Model):
     payment_due_gt = models.FloatField(null=False, blank=False, default=0)
     date = models.DateField(default=timezone.now, null=False, blank=False)
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='purchase')
+    p_payment = models.ManyToManyField('payments', related_name='purchase')
 
     def __str__(self):
         return self.invoice_no
