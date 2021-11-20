@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register('sales', SaleViewSets)
 router.register('productandquantity', ProductAndQuantityViewSets)
 router.register('payments', PaymentsViewSets)
+router.register('purchase', PurchaseViewSets)
 
 
 

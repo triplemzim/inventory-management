@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from master.models import m_customer, m_product, m_warehouse, m_supplier, m_bank
 import datetime
+from django.utils import timezone
 
 
 # Create your models here.
@@ -20,10 +21,10 @@ class payments(models.Model):
     supplier = models.ForeignKey(m_supplier, null=True, blank=True, on_delete=models.SET_NULL, related_name='payments')
     debit_or_credit = models.CharField(max_length=20, choices=TRANSACTION_CHOICES, default='DEBIT')
     amount = models.FloatField(default=0, null=False, blank=False)
-    date = models.DateTimeField(default=datetime.datetime.now(), null=False, blank=False)
+    date = models.DateField(default=timezone.now, null=False, blank=False)
     payment_type = models.CharField(max_length=20, default='CASH', choices=PAYMENT_CHOICES, null=False, blank='False')
     bank = models.ForeignKey(m_bank, null=True, blank=True, on_delete=models.SET_NULL)
-    invoice_no = models.CharField(max_length=200, null=True, blank=True, unique=True)
+    invoice_no = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         name = ''
@@ -32,7 +33,7 @@ class payments(models.Model):
         elif self.supplier:
             name = self.supplier.name
 
-        return name + ' - ' + str(self.date)
+        return name + ' - ' + str(self.invoice_no) + ' - ' + str(self.amount)
 
     class Meta:
         verbose_name = 'Payment'
@@ -50,8 +51,9 @@ class sale(models.Model):
     invoice_no = models.CharField(max_length=200, unique=True, blank=False, null=False)
     payment_received_gt = models.FloatField(null=False, blank=False, default=0)
     payment_due_gt = models.FloatField(null=False, blank=False, default=0)
-    date = models.DateTimeField(default=datetime.datetime.now(), null=False, blank=False)
+    date = models.DateField(default=timezone.now, null=False, blank=False)
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='sale')
+    payment = models.ManyToManyField('payments', related_name='sale')
 
     def __str__(self):
         return self.invoice_no
@@ -88,8 +90,9 @@ class purchase(models.Model):
     invoice_no = models.CharField(max_length=200, unique=True, blank=False, null=False)
     payment_paid_gt = models.FloatField(null=False, blank=False, default=0)
     payment_due_gt = models.FloatField(null=False, blank=False, default=0)
-    date = models.DateTimeField(default=datetime.datetime.now(), null=False, blank=False)
+    date = models.DateField(default=timezone.now, null=False, blank=False)
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='purchase')
+    p_payment = models.ManyToManyField('payments', related_name='purchase')
 
     def __str__(self):
         return self.invoice_no

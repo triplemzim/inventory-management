@@ -1,0 +1,34 @@
+{
+    "name": "Atiq",
+    "contact": "1239494",
+    "address": "bogra",
+    "invoice_no": "i5",
+    "payment_received_gt": 1692,
+    "payment_due_gt": 0,
+    "date": "19/11/2021",
+    "customer": {
+        "id": "46301152-9936-48cd-9b31-d9342ffda1b5"
+    },
+    "warehouse": {
+        "id": "99525d34-d45e-466c-b547-00c0eb247df3"
+    },
+    "payment": [
+        {
+            "debit_or_credit": "DEBIT",
+            "amount": 1692,
+            "date": "19/11/2021",
+            "payment_type": "CASH",
+            "invoice_no": "i5",
+            "customer": "46301152-9936-48cd-9b31-d9342ffda1b5"
+        }
+    ],
+    "productAndQuantity": [
+        {
+            "product": 34534,
+            "invoice_no": "i5",
+            "quantity": 92,
+            "discount_in_percent": 20,
+            "price": 23
+        }
+    ]
+}

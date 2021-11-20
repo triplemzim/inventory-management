@@ -33,3 +33,10 @@ class PaymentsViewSets(mixins.ListModelMixin,
                        viewsets.GenericViewSet):
     serializer_class = PaymentsSerializer
     queryset = payments.objects.all()
+
+class PurchaseViewSets(mixins.ListModelMixin,
+                   mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
+    serializer_class = PurchaseSerializer
+    queryset = purchase.objects.all()
