@@ -4,6 +4,8 @@ from rest_framework import mixins
 from django.http import HttpResponse
 from .serializers import *
 from .models import *
+from rest_framework import generics
+
 
 
 # Create your views here.
@@ -40,3 +42,18 @@ class PurchaseViewSets(mixins.ListModelMixin,
                    viewsets.GenericViewSet):
     serializer_class = PurchaseSerializer
     queryset = purchase.objects.all()
+
+
+class SaleByInvoiceView(generics.ListAPIView):
+    serializer_class = SaleSerializer
+
+    def get_queryset(self):
+        invoice = self.kwargs.get('invoice')
+        return sale.objects.filter(invoice_no=invoice)
+
+class PurchaseByInvoiceView(generics.ListAPIView):
+    serializer_class = PurchaseSerializer
+
+    def get_queryset(self):
+        invoice = self.kwargs.get('invoice')
+        return purchase.objects.filter(invoice_no=invoice)

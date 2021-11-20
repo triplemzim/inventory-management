@@ -8,9 +8,11 @@ router.register('sales', SaleViewSets)
 router.register('productandquantity', ProductAndQuantityViewSets)
 router.register('payments', PaymentsViewSets)
 router.register('purchase', PurchaseViewSets)
-
+# router.register('saleinvoice', SaleByInvoiceViewSets, basename='invoice')
 
 
 urlpatterns=[
     path('', include(router.urls)),
+    path('sale-invoice/<str:invoice>/', views.SaleByInvoiceView.as_view(), name='sale_invoice'),
+    path('purchase-invoice/<str:invoice>/', views.PurchaseByInvoiceView.as_view(), name='purchase_invoice'),
 ]

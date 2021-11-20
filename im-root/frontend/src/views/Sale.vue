@@ -400,7 +400,7 @@ export default {
                     <div class="form-group row">
                       <label for="warehouseDate" class="col-lg-4 col-form-label">Date</label>
                       <div class="col-lg-8">
-                        <input type="text" class="form-control" id="warhouseDatepicker" v-model="dateSelected"/>
+                        <input type="text" class="form-control" id="warhouseDatepicker" v-model="dateSelected" readonly/>
                       </div>
                     </div>
                     <div class="form-group row">
