@@ -1,0 +1,37 @@
+{
+    "name": "Paona",
+    "contact": "63098",
+    "address": "Khandar",
+    "invoice_no": "c2",
+    "payment_paid_gt": 46,
+    "payment_due_gt": "0.00",
+    "date": "20/11/2021",
+    "supplier": "6a67d2ad-c43b-402a-a40b-b299f687f0ea",
+    "warehouse": "99525d34-d45e-466c-b547-00c0eb247df3",
+    "p_payment": [
+        {
+            "debit_or_credit": "CREDIT",
+            "amount": 46,
+            "date": "20/11/2021",
+            "payment_type": "CASH",
+            "invoice_no": "c2",
+            "supplier": "6a67d2ad-c43b-402a-a40b-b299f687f0ea"
+        }
+    ],
+    "productAndQuantity": [
+        {
+            "product": 34534,
+            "invoice_no": "c2",
+            "quantity": 1,
+            "discount_in_percent": 0,
+            "price": 23
+        },
+        {
+            "product": 234234,
+            "invoice_no": "c2",
+            "quantity": 1,
+            "discount_in_percent": 0,
+            "price": 23
+        }
+    ]
+}
