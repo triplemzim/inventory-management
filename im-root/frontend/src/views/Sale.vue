@@ -291,7 +291,7 @@ export default {
                   <div class="customer-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Customer</h5>
+                        <h6>Customer</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -326,7 +326,7 @@ export default {
                   <div class="product-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Product</h5>
+                        <h6>Product</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -407,7 +407,7 @@ export default {
                   <div class="warehouse-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Warehouse</h5>
+                        <h6>Warehouse</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -460,7 +460,7 @@ export default {
               <h5>Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
-                  <h4>{{ COMPANY_NAME }}</h4>
+                  <h5>{{ COMPANY_NAME }}</h5>
                   <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                 </div>
                 <div class="invoice-info">
@@ -500,7 +500,7 @@ export default {
                   </div>
                 </div>
                 <div class="invoice-table">
-                  <h5>Product List</h5>
+                  <h6>Product List</h6>
                   <table class="table table-bordered card-header">
                     <thead>
                     <tr>
@@ -611,6 +611,7 @@ html {
   border: 1px solid #dfdfdf;
   box-shadow: 0 0 3px 0px #e9e9e9;
   border-radius: 5px;
+  /*font-size: 11px;*/
 }
 
 .customer-info-box .form-group,

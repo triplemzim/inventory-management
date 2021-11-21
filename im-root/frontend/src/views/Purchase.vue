@@ -279,7 +279,7 @@ export default {
                   <div class="supplier-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Supplier</h5>
+                        <h6>Supplier</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -314,7 +314,7 @@ export default {
                   <div class="product-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Product</h5>
+                        <h6>Product</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -395,7 +395,7 @@ export default {
                   <div class="warehouse-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h5>Warehouse</h5>
+                        <h6>Warehouse</h6>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -448,7 +448,7 @@ export default {
               <h5>Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
-                  <h4>{{ COMPANY_NAME }}</h4>
+                  <h6>{{ COMPANY_NAME }}</h6>
                   <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                 </div>
                 <div class="invoice-info">
@@ -488,7 +488,7 @@ export default {
                   </div>
                 </div>
                 <div class="invoice-table">
-                  <h5>Product List</h5>
+                  <h6>Product List</h6>
                   <table class="table table-bordered card-header">
                     <thead>
                     <tr>
