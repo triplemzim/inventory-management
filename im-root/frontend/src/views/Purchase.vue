@@ -274,7 +274,7 @@ export default {
         <div class="row">
           <div class="col-lg-6">
             <div class="sticky-top">
-              <form @submit.prevent="submitSale">
+              <form @submit.prevent="submitPurchase">
                 <div class="supplier-information">
                   <div class="supplier-info-box">
                     <div class="card">
