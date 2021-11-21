@@ -266,6 +266,9 @@ export default {
 
 <template>
   <div class="containerRoot" id="home">
+    <h3 class="col-lg text-center mt-3" style="font-weight: bold">
+      <span>Purchase</span>
+    </h3>
     <section class="supplier">
       <div class="container">
         <div class="row">
@@ -273,144 +276,165 @@ export default {
             <div class="sticky-top">
               <form @submit.prevent="submitPurchase">
                 <div class="supplier-information">
-                  <h3>Supplier</h3>
                   <div class="supplier-info-box">
-                    <div class="form-group row">
-                      <AutoComplete :dataList="supplierList" :title="'Search Supplier'"
-                                    @selectedData="handleSelectSupplier" key="supplier"/>
-                    </div>
-                    <div class="form-group row">
-                      <label for="supplierAddress" class="col-lg-4 col-form-label">Supplier Name</label>
-                      <div class="col-lg-8">
-                        <input type="text" required class="form-control" id="supplierName" v-model="supplierName">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5>Supplier</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="form-group row">
+                          <AutoComplete :dataList="supplierList" :title="'Search Supplier'"
+                                        @selectedData="handleSelectSupplier" key="supplier"/>
+                        </div>
+                        <div class="form-group row">
+                          <label for="supplierAddress" class="col-lg-4 col-form-label">Supplier Name</label>
+                          <div class="col-lg-8">
+                            <input type="text" required class="form-control" id="supplierName" v-model="supplierName">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="supplierAddress" class="col-lg-4 col-form-label">Address</label>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="supplierAddress" v-model="address">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="supplierContact" class="col-lg-4 col-form-label">Contact</label>
+                          <div class="col-lg-8">
+                            <input type="text" required class="form-control" id="supplierContact" v-model="contact">
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="supplierAddress" class="col-lg-4 col-form-label">Address</label>
-                      <div class="col-lg-8">
-                        <input type="text" class="form-control" id="supplierAddress" v-model="address">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="supplierContact" class="col-lg-4 col-form-label">Contact</label>
-                      <div class="col-lg-8">
-                        <input type="text" required class="form-control" id="supplierContact" v-model="contact">
-                      </div>
-                    </div>
+
                   </div>
                 </div>
                 <div class="product-information">
-                  <h3>Product</h3>
-                  <div class="product-info-box">
 
-                    <div class="form-group row">
-                      <label for="productName" class="col-lg-4 col-form-label">Product Name</label>
-                      <div class="col-lg-8">
-                        <input class="form-control" list="datalistOptions2" id="productName"
-                               placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
-                               v-bind:value="productName">
-                        <datalist id="datalistOptions2">
-                          <option v-for="item in productList" :key="item.id" :value="item.value"/>
-                        </datalist>
+                  <div class="product-info-box">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5>Product</h5>
                       </div>
-                    </div>
-                    <div class="row product-image">
-                      <div class="col-lg-4">
-                        <p>Product Image</p>
-                      </div>
-                      <div class="col-lg-8">
-                        <img src="{{ productImage }}" class="">
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-lg-6">
+                      <div class="card-body">
                         <div class="form-group row">
-                          <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
+                          <label for="productName" class="col-lg-4 col-form-label">Product Name</label>
                           <div class="col-lg-8">
-                            <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
-                                   class="form-control" id="productBarcode" v-model="barcode">
+                            <input class="form-control" list="datalistOptions2" id="productName"
+                                   placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
+                                   v-bind:value="productName">
+                            <datalist id="datalistOptions2">
+                              <option v-for="item in productList" :key="item.id" :value="item.value"/>
+                            </datalist>
+                          </div>
+                        </div>
+                        <div class="row product-image">
+                          <div class="col-lg-4 col-form-label">
+                            <p>Product Image</p>
+                          </div>
+                          <div class="col-lg-8">
+                            <img src="{{ productImage }}" class="">
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
+                              <div class="col-lg-8">
+                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                       class="form-control" id="productBarcode" v-model="barcode">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productQuantity" class="col-lg-4 col-form-label">Quantity</label>
+                              <div class="col-lg-8">
+                                <input type="number" class="form-control" id="productQuantity" v-model="quantity">
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productPrice" class="col-lg-4 col-form-label">Price</label>
+                              <div class="col-lg-8">
+                                <input type="text" class="form-control" id="productPrice" v-model="price">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productDiscount" class="col-lg-4 col-form-label">Discount (%)</label>
+                              <div class="col-lg-8">
+                                <input type="number" class="form-control" id="productDiscount" v-model="discount">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productPrice" class="col-lg-4 col-form-label">Total Price</label>
+                              <div class="col-lg-8">
+                                <input type="number" class="form-control" id="productPrice" readonly
+                                       v-bind:value="getTotalPrice()">
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <div class="col-lg-6">
-                        <div class="form-group row">
-                          <label for="productQuantity"
-                                 class="col-lg-4 col-form-label">Quantity</label>
-                          <div class="col-lg-8">
-                            <input type="number" class="form-control" id="productQuantity" v-model="quantity">
-                          </div>
+                      <div class="card-footer">
+                        <div class="product-button">
+                          <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                         </div>
                       </div>
-                    </div>
-                    <div class="row">
-                      <div class="col-lg-6">
-                        <div class="form-group row">
-                          <label for="productPrice" class="col-lg-4 col-form-label">Price</label>
-                          <div class="col-lg-8">
-                            <input type="text" class="form-control" id="productPrice" v-model="price">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-lg-6">
-                        <div class="form-group row">
-                          <label for="productDiscount"
-                                 class="col-lg-4 col-form-label">Discount (%)</label>
-                          <div class="col-lg-8">
-                            <input type="number" class="form-control" id="productDiscount" v-model="discount">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col-lg-6">
-                        <div class="form-group row">
-                          <label for="productPrice" class="col-lg-4 col-form-label">Total Price</label>
-                          <div class="col-lg-8">
-                            <input type="number" class="form-control" id="productPrice" readonly
-                                   v-bind:value="getTotalPrice()">
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="product-button">
-                      <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                     </div>
                   </div>
                 </div>
                 <div class="warehouse-information">
-                  <h3>Warehouse</h3>
                   <div class="warehouse-info-box">
-                    <div class="form-group row">
-                      <label class="col-lg-4 col-form-label">Warehouse Name</label>
-                      <div class="col-lg-8">
-                        <select class="form-select" v-model="warehouse">
-                          <!--                        <option selected value="4">Warhouse One</option>-->
-                          <option v-for="whouse in warehouseList" :key="whouse.id" :value="whouse.id">{{
-                              whouse.name
-                            }}
-                          </option>
-                          <!--                        <option value="1">Warhouse Two</option>-->
-                          <!--                        <option value="2">Warhouse Three</option>-->
-                          <!--                        <option value="3">Warhouse Four</option>-->
-                        </select>
+                    <div class="card">
+                      <div class="card-header">
+                        <h5>Warehouse</h5>
+                      </div>
+                      <div class="card-body">
+                        <div class="form-group row">
+                          <label class="col-lg-4 col-form-label">Warehouse Name</label>
+                          <div class="col-lg-8">
+                            <select class="form-select" v-model="warehouse">
+                              <!--                        <option selected value="4">Warhouse One</option>-->
+                              <option v-for="whouse in warehouseList" :key="whouse.id" :value="whouse.id">{{
+                                  whouse.name
+                                }}
+                              </option>
+                              <!--                        <option value="1">Warhouse Two</option>-->
+                              <!--                        <option value="2">Warhouse Three</option>-->
+                              <!--                        <option value="3">Warhouse Four</option>-->
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="warehouseInvoice" class="col-lg-4 col-form-label">Invoice No</label>
+                          <div class="col-lg-8">
+                            <input type="text" required class="form-control" id="warehouseInvoice" v-model="invoiceNo">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="warehouseDate" class="col-lg-4 col-form-label">Date</label>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="warhouseDatepicker" v-model="dateSelected"
+                                   readonly/>
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
+                          <div class="col-lg-8">
+                            <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="form-group row">
-                      <label for="warehouseInvoice" class="col-lg-4 col-form-label">Invoice No</label>
-                      <div class="col-lg-8">
-                        <input type="text" required class="form-control" id="warehouseInvoice" v-model="invoiceNo">
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="warehouseDate" class="col-lg-4 col-form-label">Date</label>
-                      <div class="col-lg-8">
-                        <input type="text" class="form-control" id="warhouseDatepicker" v-model="dateSelected"/>
-                      </div>
-                    </div>
-                    <div class="form-group row">
-                      <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
-                      <div class="col-lg-8">
-                        <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
-                      </div>
-                    </div>
+
                   </div>
                 </div>
                 <div class="sell-submit-btn">
@@ -421,10 +445,11 @@ export default {
           </div>
           <div class="col-lg-6">
             <div class="invoice-information">
-              <h3>Invoice</h3>
+              <h5>Invoice</h5>
               <div class="invoice-info-box">
-                <div class="invoice-heading">
+                <div class="invoice-heading card-header">
                   <h4>{{ COMPANY_NAME }}</h4>
+                  <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                 </div>
                 <div class="invoice-info">
                   <div class="row">
@@ -446,7 +471,7 @@ export default {
                       <p><strong>Contact:</strong> {{ contact }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
-                      <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
+                      <p><strong>Invoice Type:</strong> Supplier</p>
                     </div>
                     <div class="col-lg-6">
                       <p></p>
@@ -463,8 +488,8 @@ export default {
                   </div>
                 </div>
                 <div class="invoice-table">
-                  <h4>Product List</h4>
-                  <table class="table table-bordered">
+                  <h5>Product List</h5>
+                  <table class="table table-bordered card-header">
                     <thead>
                     <tr>
                       <th scope="col">Name</th>
@@ -670,5 +695,11 @@ html {
 
 .text-right-align {
   text-align: right;
+}
+
+.invoice-heading {
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ccc;
 }
 </style>
