@@ -13,6 +13,6 @@ router.register('purchase', PurchaseViewSets)
 
 urlpatterns=[
     path('', include(router.urls)),
-    path('sale-invoice/<str:invoice>/', views.SaleByInvoiceView.as_view(), name='sale_invoice'),
-    path('purchase-invoice/<str:invoice>/', views.PurchaseByInvoiceView.as_view(), name='purchase_invoice'),
+    path('sale-invoice/<str:search_key>/', views.SaleByInvoiceContactNameView.as_view(), name='sale_invoice'),
+    path('purchase-invoice/<str:search_key>/', views.PurchaseByInvoiceContactNameView.as_view(), name='purchase_invoice'),
 ]

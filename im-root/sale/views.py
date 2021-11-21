@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from .serializers import *
 from .models import *
 from rest_framework import generics
-
+from .pagination import SmallsetPagination
 
 
 # Create your views here.
@@ -44,16 +44,32 @@ class PurchaseViewSets(mixins.ListModelMixin,
     queryset = purchase.objects.all()
 
 
-class SaleByInvoiceView(generics.ListAPIView):
+class SaleByInvoiceContactNameView(generics.ListAPIView):
     serializer_class = SaleSerializer
+    pagination_class = SmallsetPagination
 
     def get_queryset(self):
-        invoice = self.kwargs.get('invoice')
-        return sale.objects.filter(invoice_no=invoice)
+        key = self.kwargs.get('search_key')
+        objs = sale.objects.filter(invoice_no=key).order_by('-date')
+        if objs.count() == 0:
+            objs = sale.objects.filter(contact=key).order_by('-date')
+        if objs.count() == 0:
+            objs = sale.objects.filter(name__icontains=key).order_by('-date')
 
-class PurchaseByInvoiceView(generics.ListAPIView):
+        return objs
+
+class PurchaseByInvoiceContactNameView(generics.ListAPIView):
     serializer_class = PurchaseSerializer
+    pagination_class = SmallsetPagination
 
     def get_queryset(self):
-        invoice = self.kwargs.get('invoice')
-        return purchase.objects.filter(invoice_no=invoice)
+        key = self.kwargs.get('search_key')
+        objs = purchase.objects.filter(invoice_no=key).order_by('-date')
+        if objs.count() == 0:
+            objs = purchase.objects.filter(contact=key).order_by('-date')
+        if objs.count() == 0:
+            objs = purchase.objects.filter(name__icontains=key).order_by('-date')
+
+        return objs
+
+
