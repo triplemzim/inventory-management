@@ -2,6 +2,7 @@ import {createRouter, createWebHistory} from "vue-router";
 import Home from "../views/Home.vue";
 import Sale from "../views/Sale";
 import Purchase from "../views/Purchase";
+import Invoice from "../views/Invoice";
 
 
 const routes = [
@@ -19,6 +20,14 @@ const routes = [
         path:"/purchase/",
         name: "purchase",
         component: Purchase,
+    },
+    {
+        name: "invoice",
+        component: Invoice,
+        path:"/invoice/",
+        props: route => ({
+            ...route.params
+        })
     },
     // {
     //   path: "/about",

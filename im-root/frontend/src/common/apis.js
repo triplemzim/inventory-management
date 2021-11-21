@@ -87,3 +87,37 @@ export const postPurchase = async (payload) => {
         return e.response;
     }
 }
+
+export const getSaleInvoiceList = async (searchKey) => {
+    const endpoint = '/sale/sale-invoice/' + searchKey + '/';
+    try {
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
+
+export const getPurchaseInvoiceList = async (searchKey) => {
+    const endpoint = '/sale/purchase-invoice/' + searchKey + '/';
+    try {
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
+
+export const getNextInvoiceList = async (endpoint) => {
+    try {
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
+
+
