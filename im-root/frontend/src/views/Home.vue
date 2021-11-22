@@ -34,7 +34,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/sale.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Sales Form</h6>-->
@@ -45,7 +45,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/purchase.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Card Heading</h6>-->
@@ -56,7 +56,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Card Heading</h6>-->
@@ -67,7 +67,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Card Heading</h6>-->
@@ -78,7 +78,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Card Heading</h6>-->
@@ -89,7 +89,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box">
                   <div class="dashboard-card-box-image">
-                    <img src="image.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
 <!--                    <h6>Card Heading</h6>-->
