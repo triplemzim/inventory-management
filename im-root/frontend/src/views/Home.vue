@@ -1,14 +1,27 @@
 /* eslint-disable */
 <script>
+import { getPurchaseInvoiceList } from '@/common/apis';
+
 export default {
   methods: {
     goToSales: function () {
       console.log('go to sales');
-      this.$router.push({name : 'sales'});
+      this.$router.push({name: 'sales'});
     },
     goToPurchase: function () {
       console.log('go to purchase');
-      this.$router.push({name : 'purchase'});
+      this.$router.push({name: 'purchase'});
+    },
+    goToInvoice: async function () {
+      const response = await getPurchaseInvoiceList('c2');
+      console.log(response.data);
+      this.$router.push({
+        name: 'invoice',
+        params: {
+          invoice: JSON.stringify(response.data.results[0]),
+          type: 'purchase'
+        }
+      });
     }
   }
 }
@@ -22,6 +35,16 @@ export default {
         <div class="col-md-8">
           <div class="dashboard-search">
             <h6 style="font-weight: bold">Search Invoice</h6>
+            <div style="font-size: 13px">
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="sale" checked>
+              <label class="form-check-label" for="inlineRadio1">Sale</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="purchase">
+              <label class="form-check-label" for="inlineRadio2">Purchase</label>
+            </div>
+              </div>
             <div class="dashboard-search-input-box">
               <input type="search" class="form-control" placeholder="Invoice/ Phone/ Name">
               <button type="submit" class="dashboard-search-icon">
@@ -37,7 +60,7 @@ export default {
                     <img src="@/assets/sale.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Sales Form</h6>-->
+                    <!--                    <h6>Sales Form</h6>-->
                     <a @click="goToSales" class="btn btn-outline-secondary">Sales</a>
                   </div>
                 </div>
@@ -48,7 +71,7 @@ export default {
                     <img src="@/assets/purchase.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Card Heading</h6>-->
+                    <!--                    <h6>Card Heading</h6>-->
                     <a @click="goToPurchase" class="btn btn-outline-secondary">Purchase</a>
                   </div>
                 </div>
@@ -59,8 +82,8 @@ export default {
                     <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Card Heading</h6>-->
-                    <a @click="doNothing" class="btn btn-outline-secondary">Warehouse Transfer</a>
+                    <!--                    <h6>Card Heading</h6>-->
+                    <a @click="goToInvoice" class="btn btn-outline-secondary">Warehouse Transfer</a>
                   </div>
                 </div>
               </div>
@@ -70,7 +93,7 @@ export default {
                     <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Card Heading</h6>-->
+                    <!--                    <h6>Card Heading</h6>-->
                     <a @click="doNothing" class="btn btn-outline-secondary">Sales Return</a>
                   </div>
                 </div>
@@ -81,7 +104,7 @@ export default {
                     <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Card Heading</h6>-->
+                    <!--                    <h6>Card Heading</h6>-->
                     <a @click="doNothing" class="btn btn-outline-secondary">Purchase Return</a>
                   </div>
                 </div>
@@ -92,7 +115,7 @@ export default {
                     <img src="@/assets/default.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
-<!--                    <h6>Card Heading</h6>-->
+                    <!--                    <h6>Card Heading</h6>-->
                     <a @click="doNothing" class="btn btn-outline-secondary">Reports</a>
                   </div>
                 </div>
@@ -205,7 +228,8 @@ export default {
 .dashboard-right {
   margin-left: 30px;
 }
-.dashboard-right-box>h6 {
+
+.dashboard-right-box > h6 {
   font-weight: bold;
 }
 </style>
