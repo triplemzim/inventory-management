@@ -16,6 +16,7 @@ export default {
     const paymentReceived = ref(null);
     const productTable = ref(null);
     const grandTotal = ref(null);
+    const invoiceType = ref(null);
 
     return {
       componentName,
@@ -31,13 +32,14 @@ export default {
       paymentReceived,
       productTable,
       grandTotal,
+      invoiceType,
     }
   },
   created() {
     const data = JSON.parse(this.$route.params.invoice);
-    const type = this.$route.params.type;
+    this.invoiceType = this.$route.params.type;
 
-    if (type === 'sale') {
+    if (this.invoiceType === 'Sale Invoice') {
       this.customerName = data.customer.name;
       this.address = data.customer.address;
       this.contact = data.customer.contact;
@@ -82,10 +84,10 @@ export default {
         <div class="row">
           <div class="offset-0 col-12 offset-sm-2 col-sm-8">
             <div class="invoice-information">
-              <h4>Invoice</h4>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h5>{{ COMPANY_NAME }}</h5>
+                  <h6>{{ invoiceType }}</h6>
                 </div>
                 <div class="invoice-info">
                   <div class="row">
