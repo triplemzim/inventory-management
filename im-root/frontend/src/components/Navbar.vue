@@ -10,6 +10,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
+          <li class="nav-item" style="margin-right: 10px">
+            <a class="btn btn-outline-danger" href="/admin/">Admin</a>
+          </li>
           <li class="nav-item">
             <a class="btn btn-outline-success" href="/accounts/logout/">Logout</a>
           </li>

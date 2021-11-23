@@ -3,7 +3,7 @@
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {getSupplierList, getProductList, getWarehouseList, postPurchase} from "@/common/apis";
+import {postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 
 export default {
@@ -11,7 +11,8 @@ export default {
   components: {
     // AutoComplete
   },
-  setup() {
+  props: ['rootSupplierList', 'rootProductList', 'rootWarehouseList'],
+  setup(props) {
     const supplierList = ref(null);
     const rawSupplierList = ref(null);
     const rawProductList = ref(null);
@@ -48,7 +49,7 @@ export default {
       jq("#warhouseDatepicker").datepicker();
 
       // Supplier list
-      let response = await getSupplierList();
+      let response = props.rootSupplierList;
       console.log(componentName, 'api-supplier-list', response.data);
       response.data.forEach(supplier => {
         const temp = {};
@@ -61,7 +62,7 @@ export default {
 
       //Product-List
       const productData = [];
-      const anotherResponse = await getProductList();
+      const anotherResponse = props.rootProductList;
       console.log(componentName, 'api-product-list', anotherResponse.data)
       anotherResponse.data.forEach(product => {
         const temp = {};
@@ -74,7 +75,7 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = await getWarehouseList();
+      const warehouseListResponse = props.rootWarehouseList;
       console.log(componentName, 'api-warehouse-list', warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
