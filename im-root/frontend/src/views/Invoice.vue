@@ -3,9 +3,7 @@ import {ref} from "vue";
 import {COMPANY_NAME} from "@/common/strings";
 
 export default {
-  props: ['invoice'],
-  setup(props) {
-    const selectedCustomer = ref('');
+  setup() {
     const componentName = ':invoice:';
     const address = ref(null);
     const contact = ref(null);
@@ -17,12 +15,10 @@ export default {
     const customerName = ref(null);
     const paymentReceived = ref(null);
     const productTable = ref(null);
-
-    console.log(props.invoice);
-
+    const grandTotal = ref(null);
+    const invoiceType = ref(null);
 
     return {
-      selectedCustomer,
       componentName,
       COMPANY_NAME,
       address,
@@ -35,9 +31,50 @@ export default {
       customerName,
       paymentReceived,
       productTable,
+      grandTotal,
+      invoiceType,
     }
   },
-  methods: {}
+  created() {
+    const data = JSON.parse(this.$route.params.invoice);
+    console.log(data);
+    this.invoiceType = this.$route.params.type;
+
+    if (this.invoiceType === 'Sale Invoice') {
+      this.customerName = data.customer.name;
+      this.address = data.customer.address;
+      this.contact = data.customer.contact;
+      this.due = data.payment_due_gt;
+      this.paymentReceived = data.payment_received_gt;
+      this.grandTotal = data.payment_received_gt + data.payment_due_gt;
+    } else {
+      this.customerName = data.supplier.name;
+      this.address = data.supplier.address;
+      this.contact = data.supplier.contact;
+      this.due = data.payment_due_gt;
+      this.paymentReceived = data.payment_paid_gt;
+      this.grandTotal = data.payment_paid_gt + data.payment_due_gt;
+
+    }
+
+    this.warehouse = data.warehouse.name;
+    this.invoiceNo = data.invoice_no;
+    this.dateSelected = data.date;
+    this.productTable = data.productAndQuantity;
+  },
+  methods: {
+    getTotalPrice: function (row) {
+      let priceNoDic = row.price * row.quantity;
+      return priceNoDic - (priceNoDic * row.discount_in_percent / 100.0);
+    },
+    // getGrandTotal: function () {
+    //   let sum = 0;
+    //   this.productTable.forEach(x => {
+    //     sum = sum + this.getTotalPrice(x);
+    //   });
+    //   return Math.floor(sum);
+    // }
+  }
 }
 </script>
 
@@ -48,10 +85,10 @@ export default {
         <div class="row">
           <div class="offset-0 col-12 offset-sm-2 col-sm-8">
             <div class="invoice-information">
-              <h4>Invoice</h4>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h5>{{ COMPANY_NAME }}</h5>
+                  <h6>{{ invoiceType }}</h6>
                 </div>
                 <div class="invoice-info">
                   <div class="row">
@@ -100,48 +137,48 @@ export default {
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- <tr v-for="row in productTable" :key="row.barcode" @click="setProductFromTable(row)">
-  <th scope="row">
-    <div class="product-name">
-      {{ row.productName }}
-      <div class="product-name-hover">
-        <span><i class="bi bi-pencil-square"></i></span>
-      </div>
-    </div>
-  </th>
-  <td>{{ row.quantity }}</td>
-  <td>{{ row.price }}</td>
-  <td>{{ row.discount }}</td>
-  <td>{{ row.totalPrice }}</td>
-</tr> -->
-                    <tr>
+                    <tr v-for="row in productTable" :key="row.product.barcode">
                       <th scope="row">
                         <div class="product-name">
-                          Product one
+                          {{ row.product.product_name.name }}
                           <div class="product-name-hover">
                             <span><i class="bi bi-pencil-square"></i></span>
                           </div>
                         </div>
                       </th>
-                      <td>2</td>
-                      <td>100</td>
-                      <td>10</td>
-                      <td>90</td>
+                      <td>{{ row.quantity }}</td>
+                      <td>{{ row.price }}</td>
+                      <td>{{ row.discount_in_percent }}</td>
+                      <td>{{ getTotalPrice(row) }}</td>
                     </tr>
-                    <tr>
-                      <th scope="row">
-                        <div class="product-name">
-                          Product Two
-                          <div class="product-name-hover">
-                            <span><i class="bi bi-pencil-square"></i></span>
-                          </div>
-                        </div>
-                      </th>
-                      <td>2</td>
-                      <td>100</td>
-                      <td>10</td>
-                      <td>90</td>
-                    </tr>
+                    <!--                    <tr>-->
+                    <!--                      <th scope="row">-->
+                    <!--                        <div class="product-name">-->
+                    <!--                          Product one-->
+                    <!--                          <div class="product-name-hover">-->
+                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </th>-->
+                    <!--                      <td>2</td>-->
+                    <!--                      <td>100</td>-->
+                    <!--                      <td>10</td>-->
+                    <!--                      <td>90</td>-->
+                    <!--                    </tr>-->
+                    <!--                    <tr>-->
+                    <!--                      <th scope="row">-->
+                    <!--                        <div class="product-name">-->
+                    <!--                          Product Two-->
+                    <!--                          <div class="product-name-hover">-->
+                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
+                    <!--                          </div>-->
+                    <!--                        </div>-->
+                    <!--                      </th>-->
+                    <!--                      <td>2</td>-->
+                    <!--                      <td>100</td>-->
+                    <!--                      <td>10</td>-->
+                    <!--                      <td>90</td>-->
+                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>
@@ -152,15 +189,15 @@ export default {
                         <tbody>
                         <tr>
                           <td><strong>Grand Total:</strong></td>
-                          <!--                          <td>{{ getGrandTotal() }}</td>-->
+                          <td>{{ grandTotal }}</td>
                         </tr>
                         <tr>
                           <td><strong>Amount Paid:</strong></td>
-                          <!--                          <td>{{ paymentReceived }}</td>-->
+                          <td>{{ paymentReceived }}</td>
                         </tr>
                         <tr>
                           <td><strong>Amount Due:</strong></td>
-                          <!--                          <td>{{ getAmountDue() }}</td>-->
+                          <td>{{ due }}</td>
                         </tr>
                         </tbody>
                       </table>

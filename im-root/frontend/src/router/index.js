@@ -26,7 +26,7 @@ const routes = [
         component: Invoice,
         path:"/invoice/",
         props: route => ({
-            ...route.params
+            invoice: route.params.invoice
         })
     },
     // {

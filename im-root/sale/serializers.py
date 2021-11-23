@@ -1,13 +1,17 @@
 from rest_framework import serializers
 from .models import *
 from master.models import stocks
-from master.serializers import StocksSerializer, CustomerSerializer, WarehouseSerializer, SupplierSerializer
+from master.serializers import StocksSerializer, CustomerSerializer, WarehouseSerializer, SupplierSerializer, ProductSerializer
 from django.db import DatabaseError, transaction
 from django.db.models import F
 from django.http import HttpResponse
 
 
 class ProductAndQuantitySerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        self.fields['product'] = ProductSerializer(read_only=True)
+        return super(ProductAndQuantitySerializer, self).to_representation(instance)
+
     class Meta:
         model = productAndQuantity
         fields = '__all__'
