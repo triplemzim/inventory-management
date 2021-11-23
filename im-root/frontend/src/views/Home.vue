@@ -21,8 +21,8 @@ export default {
       this.$router.push({name: 'purchase'});
     },
     goToInvoice: async function (event) {
-      this.resetSearch();
-      this.searchText = '';
+      // this.resetSearch();
+      // this.searchText = '';
       this.$router.push({
         name: 'invoice',
         params: {

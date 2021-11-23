@@ -3,15 +3,16 @@ Home.vue/* eslint-disable */
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {getCustomerList, getProductList, getWarehouseList, postSale} from "@/common/apis";
+import {postSale} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 
 export default {
   name: "Home",
+  props: ['rootCustomerList', 'rootProductList', 'rootWarehouseList'],
   components: {
     // AutoComplete
   },
-  setup() {
+  setup(props) {
     const customerList = ref(null);
     const rawCustomerList = ref(null);
     const rawProductList = ref(null);
@@ -48,8 +49,8 @@ export default {
       jq("#warhouseDatepicker").datepicker();
 
       // Customer list
-      let response = await getCustomerList();
-      console.log(componentName, 'api-customer-list', response.data);
+      let response = props.rootCustomerList;
+      console.log(componentName, 'props-customer-list', props.rootCustomerList.data);
       response.data.forEach(customer => {
         const temp = {};
         temp.value = customer.name;
@@ -61,8 +62,8 @@ export default {
 
       //Product-List
       const productData = [];
-      const anotherResponse = await getProductList();
-      console.log(componentName, 'api-product-list', anotherResponse.data)
+      const anotherResponse = props.rootProductList;
+      console.log(componentName, 'props-product-list', anotherResponse.data)
       anotherResponse.data.forEach(product => {
         const temp = {};
         temp.value = product.product_name.name + ' - ' + product.category.name;
@@ -74,8 +75,8 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = await getWarehouseList();
-      console.log(componentName, 'api-warehouse-list', warehouseListResponse.data);
+      const warehouseListResponse = props.rootWarehouseList;
+      console.log(componentName, 'warehouse-list', warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
         warehouse.value = warehouseList.value[0].id;
