@@ -37,6 +37,7 @@ export default {
   },
   created() {
     const data = JSON.parse(this.$route.params.invoice);
+    console.log(data);
     this.invoiceType = this.$route.params.type;
 
     if (this.invoiceType === 'Sale Invoice') {
