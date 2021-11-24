@@ -5,6 +5,7 @@ Home.vue/* eslint-disable */
 import {onMounted, ref} from "vue";
 import {postSale} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
+import {getCustomerList, getProductList, getWarehouseList} from "@/common/apis";
 
 export default {
   name: "Home",
@@ -50,6 +51,9 @@ export default {
 
       // Customer list
       let response = props.rootCustomerList;
+      if (response == null) {
+        response = await getCustomerList();
+      }
       console.log(componentName, 'props-customer-list', props.rootCustomerList.data);
       response.data.forEach(customer => {
         const temp = {};
@@ -63,6 +67,9 @@ export default {
       //Product-List
       const productData = [];
       const anotherResponse = props.rootProductList;
+      if(anotherResponse == null) {
+        anotherResponse = await getProductList();
+      }
       console.log(componentName, 'props-product-list', anotherResponse.data)
       anotherResponse.data.forEach(product => {
         const temp = {};
@@ -76,6 +83,9 @@ export default {
 
       //Warehouse-list
       const warehouseListResponse = props.rootWarehouseList;
+      if(warehouseListResponse == null) {
+        warehouseListResponse = await getWarehouseList();
+      }
       console.log(componentName, 'warehouse-list', warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
@@ -502,8 +512,8 @@ export default {
                 </div>
                 <div class="invoice-table">
                   <h6>Product List</h6>
-                  <table class="table table-bordered card-header">
-                    <thead>
+                  <table class="table table-bordered ">
+                    <thead class="card-header">
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Quantity</th>

@@ -51,6 +51,11 @@ export default {
       this.searchResult = [];
       this.nextSearch = null;
       this.previousSearch = null;
+    },
+    goToWarehouseTransfer: function () {
+      this.$router.push({
+        name: 'warehouseTransfer'
+      });
     }
   }
 }
@@ -142,7 +147,7 @@ export default {
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="goToInvoice" class="btn btn-outline-secondary">Warehouse Transfer</a>
+                    <a @click="goToWarehouseTransfer()" class="btn btn-outline-secondary">Warehouse Transfer</a>
                   </div>
                 </div>
               </div>
