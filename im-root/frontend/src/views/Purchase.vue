@@ -3,7 +3,7 @@
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {getCustomerList, postPurchase} from "@/common/apis";
+import {postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 import {getSupplierList, getProductList, getWarehouseList} from "@/common/apis";
 
@@ -66,7 +66,7 @@ export default {
 
       //Product-List
       const productData = [];
-      const anotherResponse = props.rootProductList;
+      let anotherResponse = props.rootProductList;
       if (anotherResponse == null) {
         anotherResponse = await getProductList();
       }
@@ -82,7 +82,7 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = props.rootWarehouseList;
+      let warehouseListResponse = props.rootWarehouseList;
       if (warehouseListResponse == null) {
         warehouseListResponse = await getWarehouseList();
       }

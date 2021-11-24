@@ -66,7 +66,7 @@ export default {
 
       //Product-List
       const productData = [];
-      const anotherResponse = props.rootProductList;
+      let anotherResponse = props.rootProductList;
       if(anotherResponse == null) {
         anotherResponse = await getProductList();
       }
@@ -82,7 +82,7 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = props.rootWarehouseList;
+      let warehouseListResponse = props.rootWarehouseList;
       if(warehouseListResponse == null) {
         warehouseListResponse = await getWarehouseList();
       }
