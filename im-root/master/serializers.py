@@ -48,11 +48,6 @@ class BankSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class WarehouseTransferSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = warehouse_transfer
-        fields = '__all__'
-
 
 class StocksSerializer(serializers.ModelSerializer):
     class Meta:

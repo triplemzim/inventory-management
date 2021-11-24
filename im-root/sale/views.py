@@ -72,4 +72,10 @@ class PurchaseByInvoiceContactNameView(generics.ListAPIView):
 
         return objs
 
-
+class WarehouseTransferViewsets(mixins.ListModelMixin,
+                               mixins.CreateModelMixin,
+                               mixins.RetrieveModelMixin,
+                               viewsets.GenericViewSet):
+    serializer_class = WarehouseTransferSerializer
+    pagination_class = SmallsetPagination
+    queryset = warehouse_transfer.objects.all()
