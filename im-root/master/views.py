@@ -55,12 +55,6 @@ class BankList(generics.ListAPIView):
     serializer_class = BankSerializer
     queryset = m_bank.objects.all()
 
-
-class WarehouseTransferList(generics.ListAPIView):
-    serializer_class = WarehouseTransferSerializer
-    queryset = warehouse_transfer.objects.all()
-
-
 class StocksList(generics.ListAPIView):
     serializer_class = StocksSerializer
     queryset = stocks.objects.all()

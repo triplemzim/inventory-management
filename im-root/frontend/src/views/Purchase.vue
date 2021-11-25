@@ -5,9 +5,10 @@
 import {onMounted, ref} from "vue";
 import {postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
+import {getSupplierList, getProductList, getWarehouseList} from "@/common/apis";
 
 export default {
-  name: "Home",
+  name: "Purchase",
   components: {
     // AutoComplete
   },
@@ -50,6 +51,9 @@ export default {
 
       // Supplier list
       let response = props.rootSupplierList;
+      if (response.data == null) {
+        response = await getSupplierList();
+      }
       console.log(componentName, 'api-supplier-list', response.data);
       response.data.forEach(supplier => {
         const temp = {};
@@ -62,7 +66,10 @@ export default {
 
       //Product-List
       const productData = [];
-      const anotherResponse = props.rootProductList;
+      let anotherResponse = props.rootProductList;
+      if (anotherResponse.data == null) {
+        anotherResponse = await getProductList();
+      }
       console.log(componentName, 'api-product-list', anotherResponse.data)
       anotherResponse.data.forEach(product => {
         const temp = {};
@@ -75,7 +82,10 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = props.rootWarehouseList;
+      let warehouseListResponse = props.rootWarehouseList;
+      if (warehouseListResponse.data == null) {
+        warehouseListResponse = await getWarehouseList();
+      }
       console.log(componentName, 'api-warehouse-list', warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
@@ -285,7 +295,7 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <AutoComplete :dataList="supplierList" :title="'Search Supplier'"
-                                        @selectedData="handleSelectSupplier" key="supplier"/>
+                                        @selectedData="handleSelectSupplier" key="supplier" :bindValue="supplierName"/>
                         </div>
                         <div class="form-group row">
                           <label for="supplierAddress" class="col-lg-4 col-form-label">Supplier Name</label>
@@ -342,7 +352,7 @@ export default {
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
                               <div class="col-lg-8">
-                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                <input @keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
                                        class="form-control" id="productBarcode" v-model="barcode">
                               </div>
                             </div>
@@ -490,8 +500,8 @@ export default {
                 </div>
                 <div class="invoice-table">
                   <h6>Product List</h6>
-                  <table class="table table-bordered card-header">
-                    <thead>
+                  <table class="table table-bordered ">
+                    <thead class="card-header">
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Quantity</th>

@@ -3,6 +3,7 @@ import Home from "../views/Home.vue";
 import Sale from "../views/Sale";
 import Purchase from "../views/Purchase";
 import Invoice from "../views/Invoice";
+import WarehouseTransfer from "../views/WarehouseTransfer";
 
 
 const routes = [
@@ -29,6 +30,11 @@ const routes = [
             invoice: route.params.invoice
         })
     },
+    {
+        name: "warehouseTransfer",
+        component: WarehouseTransfer,
+        path: "/warehouse-transfer/",
+    }
     // {
     //   path: "/about",
     //   name: "About",

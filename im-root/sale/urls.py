@@ -8,6 +8,7 @@ router.register('sales', SaleViewSets)
 router.register('productandquantity', ProductAndQuantityViewSets)
 router.register('payments', PaymentsViewSets)
 router.register('purchase', PurchaseViewSets)
+router.register('warehouse-transfer', WarehouseTransferViewsets)
 # router.register('saleinvoice', SaleByInvoiceViewSets, basename='invoice')
 
 

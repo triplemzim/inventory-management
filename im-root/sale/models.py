@@ -100,3 +100,32 @@ class purchase(models.Model):
     class Meta:
         verbose_name = 'Purchase'
         verbose_name_plural = 'Purchases'
+
+
+class transfer_product(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    product = models.ForeignKey(m_product, on_delete=models.CASCADE)
+    quantity = models.FloatField(null=False, blank=False, default=0)
+
+    def __str__(self):
+        return str(self.product.product_name) + ' - ' + str(self.quantity)
+
+    class Meta:
+        verbose_name = 'Transfer Product'
+        verbose_name_plural = 'Transfer Products'
+
+class warehouse_transfer(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    product_list = models.ManyToManyField(transfer_product, related_name='warehouse_transfer')
+    warehouse_source = models.ForeignKey(m_warehouse, on_delete=models.CASCADE,
+                                         related_name='warehouse_transfer_source')
+    warehouse_dest = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='warehouse_transfer_dest')
+    comment = models.CharField(max_length=200, null=True, blank=True)
+    date = models.DateField(default=timezone.now, null=False, blank=False)
+
+    def __str__(self):
+        return str(self.warehouse_source.name) + ' to ' + str(self.warehouse_dest.name)
+
+    class Meta:
+        verbose_name = 'Warehouse Transfer'
+        verbose_name_plural = 'Warehouse Transfers'
