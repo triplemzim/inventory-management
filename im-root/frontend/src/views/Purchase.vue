@@ -51,7 +51,7 @@ export default {
 
       // Supplier list
       let response = props.rootSupplierList;
-      if (response == null) {
+      if (response.data == null) {
         response = await getSupplierList();
       }
       console.log(componentName, 'api-supplier-list', response.data);
@@ -67,7 +67,7 @@ export default {
       //Product-List
       const productData = [];
       let anotherResponse = props.rootProductList;
-      if (anotherResponse == null) {
+      if (anotherResponse.data == null) {
         anotherResponse = await getProductList();
       }
       console.log(componentName, 'api-product-list', anotherResponse.data)
@@ -83,7 +83,7 @@ export default {
 
       //Warehouse-list
       let warehouseListResponse = props.rootWarehouseList;
-      if (warehouseListResponse == null) {
+      if (warehouseListResponse.data == null) {
         warehouseListResponse = await getWarehouseList();
       }
       console.log(componentName, 'api-warehouse-list', warehouseListResponse.data);
@@ -352,7 +352,7 @@ export default {
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
                               <div class="col-lg-8">
-                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                <input @keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
                                        class="form-control" id="productBarcode" v-model="barcode">
                               </div>
                             </div>

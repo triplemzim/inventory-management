@@ -8,7 +8,7 @@ import {COMPANY_NAME} from "@/common/strings";
 import {getCustomerList, getProductList, getWarehouseList} from "@/common/apis";
 
 export default {
-  name: "Home",
+  name: "Sale",
   props: ['rootCustomerList', 'rootProductList', 'rootWarehouseList'],
   components: {
     // AutoComplete
@@ -50,24 +50,24 @@ export default {
       jq("#warhouseDatepicker").datepicker();
 
       // Customer list
-      let response = props.rootCustomerList;
-      if (response == null) {
-        response = await getCustomerList();
+      let responseCustomer = props.rootCustomerList;
+      if (responseCustomer == null || responseCustomer.data == null) {
+        responseCustomer = await getCustomerList();
       }
-      console.log(componentName, 'props-customer-list', props.rootCustomerList.data);
-      response.data.forEach(customer => {
+      console.log(componentName, 'props-customer-list', responseCustomer);
+      responseCustomer.data.forEach(customer => {
         const temp = {};
         temp.value = customer.name;
         temp.id = customer.contact;
         returnData.push(temp);
       });
-      rawCustomerList.value = response.data;
+      rawCustomerList.value = responseCustomer.data;
       customerList.value = returnData;
 
       //Product-List
       const productData = [];
       let anotherResponse = props.rootProductList;
-      if(anotherResponse == null) {
+      if(anotherResponse == null || anotherResponse.data == null) {
         anotherResponse = await getProductList();
       }
       console.log(componentName, 'props-product-list', anotherResponse.data)
@@ -83,7 +83,7 @@ export default {
 
       //Warehouse-list
       let warehouseListResponse = props.rootWarehouseList;
-      if(warehouseListResponse == null) {
+      if(warehouseListResponse == null || warehouseListResponse.data == null) {
         warehouseListResponse = await getWarehouseList();
       }
       console.log(componentName, 'warehouse-list', warehouseListResponse.data);
@@ -359,7 +359,7 @@ export default {
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
                               <div class="col-lg-8">
-                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                <input v-on:keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
                                        class="form-control" id="productBarcode" v-model="barcode">
                               </div>
                             </div>

@@ -1,3 +1,167 @@
+<script>
+import {
+  getWarehouseTransferList,
+  getNextOrPrevList,
+  getProductList,
+  getWarehouseList,
+  postTransfer
+} from "@/common/apis";
+import {COMPANY_NAME} from "@/common/strings"
+
+export default {
+  props: ['rootProductList', 'rootWarehouseList'],
+  data() {
+    const today = new Date();
+
+    return {
+      warehouseTransfers: [],
+      transferCount: 0,
+      nextList: null,
+      prevList: null,
+      selectedProduct: null,
+      quantity: 0,
+      barcode: null,
+      toWarehouse: null,
+      fromWarehouse: null,
+      dateSelected: today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear(),
+      comment: null,
+      productList: [],
+      warehouseList: [],
+      componentName: 'Warehouse Transfer ',
+      productName: null,
+      COMPANY_NAME,
+      productTable: [],
+    }
+  },
+  async mounted() {
+    const jq = window.jQuery;
+    //DatePicker
+    jq("#warhouseDatepicker").datepicker();
+    const wtResponse = await getWarehouseTransferList();
+    this.warehouseTransfers = wtResponse.data;
+    console.log(this.componentName, 'transfer-list', this.warehouseTransfers.results[0]);
+
+    if (this.rootProductList.data == null) {
+      const response = await getProductList();
+      this.productList = response.data;
+    } else {
+      this.productList = this.rootProductList.data;
+    }
+
+    if (this.rootWarehouseList.data == null) {
+      const response = await getWarehouseList();
+      this.warehouseList = response.data;
+    } else {
+      this.warehouseList = this.rootWarehouseList.data;
+    }
+  },
+  methods: {
+    handleSelectProduct: function (event) {
+      console.log(this.componentName, event.target.value);
+      const selectedProduct = this.productList.find(x => x.product_name.name + ' - ' + x.category.name === event.target.value);
+      // if(selectedProduct == null) {
+      //   selectedProduct = this.rawProductList.find(x => x.barcode === event.target.value);
+      // }
+      if (selectedProduct == null) return;
+      this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
+      this.barcode = selectedProduct.barcode;
+      this.quantity = 1;
+    },
+    handleSelectProductWithBarcode: function (event) {
+      event.preventDefault();
+      console.log(this.componentName, event.target.value);
+      const selectedProduct = this.productList.find(x => x.barcode.toString() === event.target.value.toString());
+      if (selectedProduct == null) return;
+      this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
+      this.quantity = 1;
+    },
+    addProduct: function () {
+      const row = {};
+      row.productName = this.productName;
+      row.quantity = this.quantity;
+      row.barcode = this.barcode;
+      const idx = this.productTable.findIndex(x => x.productName === row.productName);
+      if (idx !== -1) this.productTable.splice(idx, 1);
+      if (row.quantity === 0) return;
+      this.productTable.push(row);
+
+      console.log('table', ...this.productTable);
+
+      this.resetProduct();
+    },
+    resetProduct: function () {
+      this.productName = '';
+      this.quantity = 0;
+      this.barcode = '';
+    },
+    submitTransfer: async function () {
+      if (!confirm("Do you confirm to submit Sale?")) {
+        return;
+      }
+      if (!this.isValidTransfer()) {
+        return;
+      }
+      const requestBody = {};
+      requestBody.warehouse_source = this.fromWarehouse;
+      requestBody.warehouse_dest = this.toWarehouse;
+      requestBody.date = this.dateSelected;
+      requestBody.comment = this.comment;
+      const requestProductList = [];
+      this.productTable.forEach(x => {
+        const oneProduct = {};
+        oneProduct.product = x.barcode;
+        oneProduct.quantity = x.quantity;
+        requestProductList.push(oneProduct);
+      });
+      requestBody.product_list = requestProductList;
+
+      console.log(this.componentName, 'transfer-payload: ', JSON.stringify(requestBody));
+      const response = await postTransfer(requestBody);
+      if (response.status === 201) {
+        alert('Transfer Record Complete!');
+        this.resetAll();
+      }
+    },
+    resetAll: async function () {
+      this.resetProduct();
+      this.productTable = [];
+      this.comment = '';
+      const wtResponse = await getWarehouseTransferList();
+      this.warehouseTransfers = wtResponse.data;
+    },
+    isValidTransfer: function () {
+      if (this.productTable.length === 0) {
+        alert('Please add some product');
+        return false;
+      }
+      if (this.fromWarehouse === this.toWarehouse) {
+        alert('Please add different warehouses');
+        return false;
+      }
+      return true;
+    },
+    findNextOrPrev: async function (endpoint) {
+      const response = await getNextOrPrevList(endpoint);
+      this.warehouseTransfers = response.data;
+    },
+    setProductFromTable: function (row) {
+      this.productName = row.productName;
+      this.quantity = row.quantity;
+      this.barcode = row.barcode;
+    },
+    getWarehouseNameFromId: function (id) {
+      const warehouse = this.warehouseList.find(x => x.id === id);
+      if (warehouse != null) {
+        return warehouse.name;
+      }
+      return '';
+    }
+
+  }
+}
+</script>
+
+
 <template>
   <div class="containerRoot" id="home">
     <h3 class="col-lg text-center mt-3" style="font-weight: bold">
@@ -8,7 +172,7 @@
         <div class="row">
           <div class="col-lg-6">
             <div class="sticky-top">
-              <form @submit.prevent="submitPurchase">
+              <form @submit.prevent="submitTransfer">
 
                 <div class="product-information">
 
@@ -25,7 +189,8 @@
                                    placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
                                    v-bind:value="productName">
                             <datalist id="datalistOptions2">
-                              <option v-for="item in productList" :key="item.id" :value="item.value"/>
+                              <option v-for="item in productList" :key="item.id"
+                                      :value="item.product_name.name + ' - ' + item.category.name"/>
                             </datalist>
                           </div>
                         </div>
@@ -34,7 +199,7 @@
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
                               <div class="col-lg-8">
-                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                <input @keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
                                        class="form-control" id="productBarcode" v-model="barcode">
                               </div>
                             </div>
@@ -67,7 +232,7 @@
                         <div class="form-group row">
                           <label class="col-lg-4 col-form-label">Source Warehouse</label>
                           <div class="col-lg-8">
-                            <select class="form-select" v-model="fromWarehouse">
+                            <select class="form-select" v-model="fromWarehouse" required>
                               <!--                        <option selected value="4">Warhouse One</option>-->
                               <option v-for="whouse in warehouseList" :key="whouse.id" :value="whouse.id">{{
                                   whouse.name
@@ -79,8 +244,7 @@
                         <div class="form-group row">
                           <label class="col-lg-4 col-form-label">Destination Warehouse</label>
                           <div class="col-lg-8">
-                            <select class="form-select" v-model="toWarehouse">
-                              <!--                        <option selected value="4">Warhouse One</option>-->
+                            <select class="form-select" v-model="toWarehouse" required>
                               <option v-for="whouse in warehouseList" :key="whouse.id" :value="whouse.id">{{
                                   whouse.name
                                 }}
@@ -99,7 +263,7 @@
                         <div class="form-group row">
                           <label for="warehouseComment" class="col-lg-4 col-form-label">Comment</label>
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="warhouseComment" v-model="warehouseComment">
+                            <input type="text" class="form-control" id="warhouseComment" v-model="comment">
                           </div>
                         </div>
                       </div>
@@ -130,24 +294,63 @@
                               To
                             </td>
                             <td>
+                              Product
+                            </td>
+                            <td>
+                              Quantity
+                            </td>
+                            <td>
                               Comment
                             </td>
                           </tr>
                           </thead>
                           <tbody>
-                          <tr>
-                            <td>{{ 'wa' }}</td>
-                            <td>{{ 'wb' }}</td>
-                            <td>{{ '11' }}</td>
-                            <td>{{ 'no comment' }}</td>
-                          </tr>
+                          <template v-for="item in warehouseTransfers.results" :key="item.id">
+                            <!--                          <tr v-for="item in warehouseTransfers.results" :key="item.id">-->
+                            <tr v-for="(row, key) in item.product_list" :key="key">
+                              <td
+                                  v-if="key === 0"
+                                  :rowspan="item.product_list.length"
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ item.date }}
+                              </td>
+                              <td
+                                  v-if="key === 0"
+                                  :rowspan="item.product_list.length"
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ item.warehouse_source.name }}
+                              </td>
+                              <td
+                                  v-if="key === 0"
+                                  :rowspan="item.product_list.length"
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ item.warehouse_dest.name }}
+                              </td>
+                              <td
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ row.product.product_name.name + ' - ' + row.product.category.name }}
+                              </td>
+                              <td
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ row.quantity }}
+                              </td>
+                              <td
+                                  v-if="key === 0"
+                                  :rowspan="item.product_list.length"
+                                  style="text-align: center; vertical-align: middle"
+                              >{{ item.comment }}
+                              </td>
+                            </tr>
+                          </template>
                           </tbody>
                         </table>
                         <div class="dashboard-search-result-button">
                           <button type="button" class="btn btn-outline-secondary bi bi-arrow-left" aria-label="Close"
-                                  @click="findInvoice(previousSearch)" :disabled="previousSearch === null"></button>
+                                  @click="findNextOrPrev(warehouseTransfers.previous)"
+                                  :disabled="warehouseTransfers.previous=== null"></button>
                           <button type="button" class="btn btn-outline-secondary bi bi-arrow-right" aria-label="Close"
-                                  @click="findInvoice(nextSearch)" :disabled="nextSearch === null"></button>
+                                  @click="findNextOrPrev(warehouseTransfers.next)"
+                                  :disabled="warehouseTransfers.next === null"></button>
                         </div>
                       </div>
                     </div>
@@ -158,7 +361,14 @@
           </div>
           <div class="col-lg-6">
             <div class="invoice-information">
-              <h5>Invoice</h5>
+              <div class="row">
+                <div class="col-lg-6" style="margin: auto">
+                  <h5>Invoice</h5>
+                </div>
+                <div class="col-lg-6" style="float: right">
+                  <button class="btn btn-outline-success mb-2" type="button">Print</button>
+                </div>
+              </div>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h6>{{ COMPANY_NAME }}</h6>
@@ -167,13 +377,13 @@
                 <div class="invoice-info">
                   <div class="row">
                     <div class="col-lg-6">
-                      <p><strong>Source Warehouse: </strong> {{ fromWarehouse }}</p>
+                      <p><strong>Source Warehouse: </strong> {{ getWarehouseNameFromId(fromWarehouse) }} </p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p></p>
                     </div>
                     <div class="col-lg-6">
-                      <p><strong>Destination Warehouse: </strong> {{ toWarehouse }}</p>
+                      <p><strong>Destination Warehouse: </strong> {{ getWarehouseNameFromId(toWarehouse) }} </p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p></p>
@@ -194,9 +404,6 @@
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Quantity</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Discount</th>
-                      <th scope="col">Total</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -210,38 +417,7 @@
                         </div>
                       </th>
                       <td>{{ row.quantity }}</td>
-                      <td>{{ row.price }}</td>
-                      <td>{{ row.discount }}</td>
-                      <td>{{ row.totalPrice }}</td>
                     </tr>
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product one-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product Two-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>

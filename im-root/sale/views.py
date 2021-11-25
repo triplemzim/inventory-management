@@ -78,4 +78,4 @@ class WarehouseTransferViewsets(mixins.ListModelMixin,
                                viewsets.GenericViewSet):
     serializer_class = WarehouseTransferSerializer
     pagination_class = SmallsetPagination
-    queryset = warehouse_transfer.objects.all()
+    queryset = warehouse_transfer.objects.all().order_by('-date')

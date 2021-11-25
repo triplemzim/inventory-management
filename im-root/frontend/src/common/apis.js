@@ -131,4 +131,14 @@ export const getWarehouseTransferList = async () => {
     }
 }
 
+export const postTransfer = async (payload) => {
+    const endpoint = '/sale/warehouse-transfer/';
+    try {
+        return await axios.post(endpoint, payload);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
 

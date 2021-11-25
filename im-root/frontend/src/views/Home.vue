@@ -143,7 +143,7 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/default.jpg" alt="">
+                    <img src="@/assets/warehouse_transfer.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->

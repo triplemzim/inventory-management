@@ -128,23 +128,23 @@ class WarehouseTransferSerializer(serializers.ModelSerializer):
         self.fields['warehouse_dest'] = WarehouseSerializer(read_only=True)
         return super(WarehouseTransferSerializer, self).to_representation(instance)
 
-    def updateStock(transferProduct, warehouseSrc, warehouseDest):
-        stock = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).first()
-        stock.quantity = F('quantity') - transferProduct.quantity
-        stock.save()
-
-        stock = stocks.objects.filter(warehouse=warehouseDest, product=transferProduct.product).first()
-        stock.quantity = F('quantity') + transferProduct.quantity
-        stock.save()
-
     def create(self, validated_data):
+        def updateStock(transferProduct, warehouseSrc, warehouseDest):
+            stock = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).first()
+            stock.quantity = F('quantity') - transferProduct.quantity
+            stock.save()
+
+            stock = stocks.objects.filter(warehouse=warehouseDest, product=transferProduct.product).first()
+            stock.quantity = F('quantity') + transferProduct.quantity
+            stock.save()
+
         try:
             with transaction.atomic():
-                products = validated_data.pop('transfer_product')
+                products = validated_data.pop('product_list')
                 warehouseTransferObj = warehouse_transfer.objects.create(**validated_data)
                 for pAndQ in products:
                     temp = transfer_product.objects.create(**pAndQ)
-                    warehouseTransferObj.transfer_product.add(temp)
+                    warehouseTransferObj.product_list.add(temp)
                     updateStock(temp, warehouseTransferObj.warehouse_source, warehouseTransferObj.warehouse_dest)
 
                 return warehouseTransferObj
