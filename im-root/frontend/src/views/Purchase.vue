@@ -8,7 +8,7 @@ import {COMPANY_NAME} from "@/common/strings";
 import {getSupplierList, getProductList, getWarehouseList} from "@/common/apis";
 
 export default {
-  name: "Home",
+  name: "Purchase",
   components: {
     // AutoComplete
   },
