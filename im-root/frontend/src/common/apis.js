@@ -110,7 +110,7 @@ export const getPurchaseInvoiceList = async (searchKey) => {
     }
 }
 
-export const getNextInvoiceList = async (endpoint) => {
+export const getNextOrPrevList = async (endpoint) => {
     try {
         return await axios.get(endpoint);
     } catch (e) {
@@ -120,4 +120,25 @@ export const getNextInvoiceList = async (endpoint) => {
     }
 }
 
+export const getWarehouseTransferList = async () => {
+    const endpoint = '/sale/warehouse-transfer/';
+    try {
+        return await axios.get(endpoint);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
+
+export const postTransfer = async (payload) => {
+    const endpoint = '/sale/warehouse-transfer/';
+    try {
+        return await axios.post(endpoint, payload);
+    } catch (e) {
+        console.log(e.response.data);
+        alert(JSON.stringify(e.response.data));
+        return e.response;
+    }
+}
 

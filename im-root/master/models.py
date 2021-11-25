@@ -112,23 +112,6 @@ class m_bank(models.Model):
         verbose_name_plural = 'Banks'
 
 
-class warehouse_transfer(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    product = models.ManyToManyField(m_product)
-    warehouse_source = models.ForeignKey(m_warehouse, on_delete=models.CASCADE,
-                                         related_name='warehouse_transfer_source')
-    warehouse_dest = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='warehouse_transfer_dest')
-    quantity = models.FloatField(null=False, blank=False, default=0)
-    transfer_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.warehouse_source + ' to ' + self.warehouse_dest
-
-    class Meta:
-        verbose_name = 'Warehouse Transfer'
-        verbose_name_plural = 'Warehouse Transfers'
-
-
 class stocks(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     product = models.ForeignKey(m_product, on_delete=models.CASCADE, related_name='stocks')
@@ -160,5 +143,3 @@ class bank_transactions(models.Model):
     class Meta:
         verbose_name = 'Bank Transaction'
         verbose_name_plural = 'Bank Transactions'
-
-

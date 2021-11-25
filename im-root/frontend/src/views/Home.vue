@@ -1,6 +1,6 @@
 /* eslint-disable */
 <script>
-import {getPurchaseInvoiceList, getSaleInvoiceList, getNextInvoiceList} from '@/common/apis';
+import {getPurchaseInvoiceList, getSaleInvoiceList, getNextOrPrevList} from '@/common/apis';
 
 export default {
   data() {
@@ -21,8 +21,8 @@ export default {
       this.$router.push({name: 'purchase'});
     },
     goToInvoice: async function (event) {
-      this.resetSearch();
-      this.searchText = '';
+      // this.resetSearch();
+      // this.searchText = '';
       this.$router.push({
         name: 'invoice',
         params: {
@@ -34,7 +34,7 @@ export default {
     findInvoice: async function (endpoint) {
       let response = null;
       if (endpoint) {
-        response = await getNextInvoiceList(endpoint);
+        response = await getNextOrPrevList(endpoint);
       } else if (this.radioSelected == 'sale') {
         response = await getSaleInvoiceList(this.searchText);
       } else {
@@ -51,6 +51,11 @@ export default {
       this.searchResult = [];
       this.nextSearch = null;
       this.previousSearch = null;
+    },
+    goToWarehouseTransfer: function () {
+      this.$router.push({
+        name: 'warehouseTransfer'
+      });
     }
   }
 }
@@ -138,11 +143,11 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/default.jpg" alt="">
+                    <img src="@/assets/warehouse_transfer.jpg" alt="">
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="goToInvoice" class="btn btn-outline-secondary">Warehouse Transfer</a>
+                    <a @click="goToWarehouseTransfer()" class="btn btn-outline-secondary">Warehouse Transfer</a>
                   </div>
                 </div>
               </div>

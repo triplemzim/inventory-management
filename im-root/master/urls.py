@@ -11,7 +11,6 @@ urlpatterns = [
     path('customer-list/', views.CustomerList.as_view(), name='customer_list'),
     path('supplier-list/', views.SupplierList.as_view(), name='supplier_list'),
     path('bank-list/', views.BankList.as_view(), name='bank_list'),
-    path('warehouse-transfer-list/', views.WarehouseTransferList.as_view(), name='warehouse_transfer_list'),
     path('stocks-list/', views.StocksList.as_view(), name='stocks_list'),
     path('stocks-list/<str:barcode>/', views.StockListProduct.as_view(), name='stock_list_product'),
     path('bank-transactions-list/', views.BankTransactionsList.as_view(), name='bank_transactions_list'),

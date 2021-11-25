@@ -3,15 +3,17 @@ Home.vue/* eslint-disable */
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {getCustomerList, getProductList, getWarehouseList, postSale} from "@/common/apis";
+import {postSale} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
+import {getCustomerList, getProductList, getWarehouseList} from "@/common/apis";
 
 export default {
-  name: "Home",
+  name: "Sale",
+  props: ['rootCustomerList', 'rootProductList', 'rootWarehouseList'],
   components: {
     // AutoComplete
   },
-  setup() {
+  setup(props) {
     const customerList = ref(null);
     const rawCustomerList = ref(null);
     const rawProductList = ref(null);
@@ -48,21 +50,27 @@ export default {
       jq("#warhouseDatepicker").datepicker();
 
       // Customer list
-      let response = await getCustomerList();
-      console.log(componentName, 'api-customer-list', response.data);
-      response.data.forEach(customer => {
+      let responseCustomer = props.rootCustomerList;
+      if (responseCustomer == null || responseCustomer.data == null) {
+        responseCustomer = await getCustomerList();
+      }
+      console.log(componentName, 'props-customer-list', responseCustomer);
+      responseCustomer.data.forEach(customer => {
         const temp = {};
         temp.value = customer.name;
         temp.id = customer.contact;
         returnData.push(temp);
       });
-      rawCustomerList.value = response.data;
+      rawCustomerList.value = responseCustomer.data;
       customerList.value = returnData;
 
       //Product-List
       const productData = [];
-      const anotherResponse = await getProductList();
-      console.log(componentName, 'api-product-list', anotherResponse.data)
+      let anotherResponse = props.rootProductList;
+      if(anotherResponse == null || anotherResponse.data == null) {
+        anotherResponse = await getProductList();
+      }
+      console.log(componentName, 'props-product-list', anotherResponse.data)
       anotherResponse.data.forEach(product => {
         const temp = {};
         temp.value = product.product_name.name + ' - ' + product.category.name;
@@ -74,8 +82,11 @@ export default {
 
 
       //Warehouse-list
-      const warehouseListResponse = await getWarehouseList();
-      console.log(componentName, 'api-warehouse-list', warehouseListResponse.data);
+      let warehouseListResponse = props.rootWarehouseList;
+      if(warehouseListResponse == null || warehouseListResponse.data == null) {
+        warehouseListResponse = await getWarehouseList();
+      }
+      console.log(componentName, 'warehouse-list', warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
         warehouse.value = warehouseList.value[0].id;
@@ -165,8 +176,6 @@ export default {
       this.productTable.push(row);
       this.paymentReceived = this.getGrandTotal();
 
-      console.log('table', ...this.productTable);
-
       this.resetProduct();
     },
     getGrandTotal: function () {
@@ -201,10 +210,7 @@ export default {
       this.totalPrice = this.getTotalPrice();
     },
     submitSale: async function () {
-
-
       if (!confirm("Do you confirm to submit Sale?")) {
-
         return;
       }
       if (this.isValidSale() == false) return;
@@ -296,7 +302,7 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <AutoComplete :dataList="customerList" :title="'Search Customer'"
-                                        @selectedData="handleSelectCustomer" key="customer"/>
+                                        @selectedData="handleSelectCustomer" key="customer" :bindValue="customerName"/>
                         </div>
                         <div class="form-group row">
                           <label for="customerAddress" class="col-lg-4 col-form-label">Customer Name</label>
@@ -353,7 +359,7 @@ export default {
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
                               <div class="col-lg-8">
-                                <input @keyup.enter="handleSelectProductWithBarcode($event)" type="text"
+                                <input v-on:keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
                                        class="form-control" id="productBarcode" v-model="barcode">
                               </div>
                             </div>
@@ -501,8 +507,8 @@ export default {
                 </div>
                 <div class="invoice-table">
                   <h6>Product List</h6>
-                  <table class="table table-bordered card-header">
-                    <thead>
+                  <table class="table table-bordered ">
+                    <thead class="card-header">
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Quantity</th>

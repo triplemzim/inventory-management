@@ -107,3 +107,48 @@ class PurchaseSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(error)
 
 
+class TransferProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = transfer_product
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        self.fields['product'] = ProductSerializer(read_only=True)
+        return super(TransferProductSerializer, self).to_representation(instance)
+
+class WarehouseTransferSerializer(serializers.ModelSerializer):
+    product_list = TransferProductSerializer(many=True, read_only=False)
+
+    class Meta:
+        model = warehouse_transfer
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        self.fields['warehouse_source'] = WarehouseSerializer(read_only=True)
+        self.fields['warehouse_dest'] = WarehouseSerializer(read_only=True)
+        return super(WarehouseTransferSerializer, self).to_representation(instance)
+
+    def create(self, validated_data):
+        def updateStock(transferProduct, warehouseSrc, warehouseDest):
+            stock = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).first()
+            stock.quantity = F('quantity') - transferProduct.quantity
+            stock.save()
+
+            stock = stocks.objects.filter(warehouse=warehouseDest, product=transferProduct.product).first()
+            stock.quantity = F('quantity') + transferProduct.quantity
+            stock.save()
+
+        try:
+            with transaction.atomic():
+                products = validated_data.pop('product_list')
+                warehouseTransferObj = warehouse_transfer.objects.create(**validated_data)
+                for pAndQ in products:
+                    temp = transfer_product.objects.create(**pAndQ)
+                    warehouseTransferObj.product_list.add(temp)
+                    updateStock(temp, warehouseTransferObj.warehouse_source, warehouseTransferObj.warehouse_dest)
+
+                return warehouseTransferObj
+        except Exception as e:
+            error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
+            raise serializers.ValidationError(error)
+

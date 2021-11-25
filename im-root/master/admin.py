@@ -38,7 +38,6 @@ admin.site.register(m_category, mCategory)
 admin.site.register(m_customer, mCustomer)
 admin.site.register(m_supplier, supplierAdmin)
 admin.site.register(m_bank, bankAdmin)
-admin.site.register(warehouse_transfer)
 admin.site.register(stocks, stocksAdmin)
 admin.site.register(bank_transactions)
 
