@@ -176,8 +176,6 @@ export default {
       this.productTable.push(row);
       this.paymentReceived = this.getGrandTotal();
 
-      console.log('table', ...this.productTable);
-
       this.resetProduct();
     },
     getGrandTotal: function () {
@@ -212,10 +210,7 @@ export default {
       this.totalPrice = this.getTotalPrice();
     },
     submitSale: async function () {
-
-
       if (!confirm("Do you confirm to submit Sale?")) {
-
         return;
       }
       if (this.isValidSale() == false) return;
@@ -307,7 +302,7 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <AutoComplete :dataList="customerList" :title="'Search Customer'"
-                                        @selectedData="handleSelectCustomer" key="customer"/>
+                                        @selectedData="handleSelectCustomer" key="customer" :bindValue="customerName"/>
                         </div>
                         <div class="form-group row">
                           <label for="customerAddress" class="col-lg-4 col-form-label">Customer Name</label>

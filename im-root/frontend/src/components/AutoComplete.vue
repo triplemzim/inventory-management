@@ -5,7 +5,7 @@
 <!--      <div class="col">-->
         <label for="customerDataList" class="col-lg-4 col-form-label">{{ title }}</label>
         <div class="col-lg-8">
-          <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-on:input="handleInput($event)"/>
+          <input class="form-control" list="datalistOptions" id="exampleDataList" placeholder="Type to search..." v-on:input="handleInput($event)" :value="bindValue">
           <datalist id="datalistOptions">
             <option v-for="item in dataList" :key="item.id" :value="item.value">{{'Phone: ' + item.id}}</option>
           </datalist>
@@ -21,7 +21,7 @@
 
 export default {
   name: "AutoComplete",
-  props: ['dataList', 'title'],
+  props: ['dataList', 'title', 'bindValue'],
   // data() {
   //   return {
   //     ds: this.dataList,

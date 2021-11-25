@@ -1,6 +1,6 @@
 /* eslint-disable */
 <script>
-import {getPurchaseInvoiceList, getSaleInvoiceList, getNextInvoiceList} from '@/common/apis';
+import {getPurchaseInvoiceList, getSaleInvoiceList, getNextOrPrevList} from '@/common/apis';
 
 export default {
   data() {
@@ -34,7 +34,7 @@ export default {
     findInvoice: async function (endpoint) {
       let response = null;
       if (endpoint) {
-        response = await getNextInvoiceList(endpoint);
+        response = await getNextOrPrevList(endpoint);
       } else if (this.radioSelected == 'sale') {
         response = await getSaleInvoiceList(this.searchText);
       } else {

@@ -295,7 +295,7 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <AutoComplete :dataList="supplierList" :title="'Search Supplier'"
-                                        @selectedData="handleSelectSupplier" key="supplier"/>
+                                        @selectedData="handleSelectSupplier" key="supplier" :bindValue="supplierName"/>
                         </div>
                         <div class="form-group row">
                           <label for="supplierAddress" class="col-lg-4 col-form-label">Supplier Name</label>
