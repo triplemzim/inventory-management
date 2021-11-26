@@ -204,6 +204,7 @@ export default {
       this.productImage = '';
       this.barcode = '';
       this.price = 0;
+      this.paymentReceived = this.getGrandTotal();
     },
     getDateToday: function () {
       const today = new Date();
@@ -286,6 +287,11 @@ export default {
         return false;
       }
       return true;
+    },
+    deleteProduct: function () {
+      const idx = this.productTable.findIndex(x => x.barcode === this.barcode);
+      if (idx !== -1) this.productTable.splice(idx, 1);
+      this.resetProduct()
     }
   }
 };
@@ -412,6 +418,10 @@ export default {
                       </div>
                       <div class="card-footer">
                         <div class="product-button">
+                          <button class="btn btn-danger mx-2" :disabled="barcode == null || barcode === ''"
+                                  type="button"
+                                  @click="deleteProduct()">Delete
+                          </button>
                           <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                         </div>
                       </div>
@@ -511,7 +521,7 @@ export default {
                       <p><strong>Invoice Type:</strong> Supplier</p>
                     </div>
                     <div class="col-lg-6">
-                      <p><strong>Paid By:</strong> {{paymentType}}</p>
+                      <p><strong>Paid By:</strong> {{ paymentType }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
