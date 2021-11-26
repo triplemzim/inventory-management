@@ -30,6 +30,7 @@ class payments(models.Model):
     bank = models.ForeignKey(m_bank, null=True, blank=True, on_delete=models.SET_NULL)
     invoice_no = models.CharField(max_length=200, null=True, blank=True)
     user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
+    transaction_id = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         name = ''
@@ -130,6 +131,7 @@ class warehouse_transfer(models.Model):
     comment = models.CharField(max_length=200, null=True, blank=True)
     date = models.DateField(default=timezone.now, null=False, blank=False)
     user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
+    # serial = models.IntegerField(default=getSerial(), null=True, blank=True, editable=False)
 
     def __str__(self):
         return str(self.warehouse_source.name) + ' to ' + str(self.warehouse_dest.name)

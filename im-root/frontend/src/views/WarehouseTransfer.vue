@@ -155,8 +155,12 @@ export default {
         return warehouse.name;
       }
       return '';
+    },
+    deleteProduct: function () {
+      const idx = this.productTable.findIndex(x => x.barcode === this.barcode);
+      if (idx !== -1) this.productTable.splice(idx, 1);
+      this.resetProduct()
     }
-
   }
 }
 </script>
@@ -216,6 +220,10 @@ export default {
                       </div>
                       <div class="card-footer">
                         <div class="product-button">
+                          <button class="btn btn-danger mx-2" :disabled="barcode == null || barcode === ''"
+                                  type="button"
+                                  @click="deleteProduct()">Delete
+                          </button>
                           <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                         </div>
                       </div>

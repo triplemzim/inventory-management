@@ -49,6 +49,7 @@ export default {
       this.due = data.payment_due_gt;
       this.paymentReceived = data.payment_received_gt;
       this.grandTotal = data.payment_received_gt + data.payment_due_gt;
+      this.paymentType = data.payment[0].payment_type;
     } else {
       this.customerName = data.supplier.name;
       this.address = data.supplier.address;
@@ -56,14 +57,13 @@ export default {
       this.due = data.payment_due_gt;
       this.paymentReceived = data.payment_paid_gt;
       this.grandTotal = data.payment_paid_gt + data.payment_due_gt;
-
+      this.paymentType = data.p_payment[0].payment_type;
     }
 
     this.warehouse = data.warehouse.name;
     this.invoiceNo = data.invoice_no;
     this.dateSelected = data.date;
     this.productTable = data.productAndQuantity;
-    this.paymentType = data.payment[0].payment_type;
   },
   methods: {
     getTotalPrice: function (row) {
