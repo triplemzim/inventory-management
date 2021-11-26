@@ -67,7 +67,7 @@ export default {
       //Product-List
       const productData = [];
       let anotherResponse = props.rootProductList;
-      if(anotherResponse == null || anotherResponse.data == null) {
+      if (anotherResponse == null || anotherResponse.data == null) {
         anotherResponse = await getProductList();
       }
       console.log(componentName, 'props-product-list', anotherResponse.data)
@@ -83,7 +83,7 @@ export default {
 
       //Warehouse-list
       let warehouseListResponse = props.rootWarehouseList;
-      if(warehouseListResponse == null || warehouseListResponse.data == null) {
+      if (warehouseListResponse == null || warehouseListResponse.data == null) {
         warehouseListResponse = await getWarehouseList();
       }
       console.log(componentName, 'warehouse-list', warehouseListResponse.data);
@@ -297,7 +297,7 @@ export default {
                   <div class="customer-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Customer</h6>
+                        <h5>Customer</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -332,7 +332,7 @@ export default {
                   <div class="product-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Product</h6>
+                        <h5>Product</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -413,7 +413,7 @@ export default {
                   <div class="warehouse-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Warehouse</h6>
+                        <h5>Warehouse</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -506,7 +506,7 @@ export default {
                   </div>
                 </div>
                 <div class="invoice-table">
-                  <h6>Product List</h6>
+                  <h5>Product List</h5>
                   <table class="table table-bordered ">
                     <thead class="card-header">
                     <tr>
@@ -602,6 +602,7 @@ export default {
 body,
 html {
   height: 100%;
+  font-size: 12px;
 }
 
 .customer {
@@ -720,5 +721,9 @@ html {
   text-align: center;
   padding-bottom: 5px;
   border-bottom: 1px solid #ccc;
+}
+
+.col-form-label {
+  font-size: 12px;
 }
 </style>
