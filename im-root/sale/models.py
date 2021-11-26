@@ -3,6 +3,8 @@ import uuid
 from master.models import m_customer, m_product, m_warehouse, m_supplier, m_bank
 import datetime
 from django.utils import timezone
+from users.models import CustomUser
+
 
 
 # Create your models here.
@@ -13,8 +15,10 @@ class payments(models.Model):
         ('CREDIT', 'Credit')
     )
     PAYMENT_CHOICES = (
-        ('CASH', 'Cash'),
-        ('BANK', 'Bank')
+        ('Cash', 'Cash'),
+        ('Card', 'Card'),
+        ('bKash', 'bKash'),
+        ('Bank', 'Bank')
     )
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, unique=True, editable=False)
     customer = models.ForeignKey(m_customer, null=True, blank=True, on_delete=models.SET_NULL, related_name='payments')
@@ -22,9 +26,10 @@ class payments(models.Model):
     debit_or_credit = models.CharField(max_length=20, choices=TRANSACTION_CHOICES, default='DEBIT')
     amount = models.FloatField(default=0, null=False, blank=False)
     date = models.DateField(default=timezone.now, null=False, blank=False)
-    payment_type = models.CharField(max_length=20, default='CASH', choices=PAYMENT_CHOICES, null=False, blank='False')
+    payment_type = models.CharField(max_length=20, default='Cash', choices=PAYMENT_CHOICES, null=False, blank='False')
     bank = models.ForeignKey(m_bank, null=True, blank=True, on_delete=models.SET_NULL)
     invoice_no = models.CharField(max_length=200, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         name = ''
@@ -54,6 +59,7 @@ class sale(models.Model):
     date = models.DateField(default=timezone.now, null=False, blank=False)
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='sale')
     payment = models.ManyToManyField('payments', related_name='sale')
+    user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.invoice_no
@@ -92,7 +98,8 @@ class purchase(models.Model):
     payment_due_gt = models.FloatField(null=False, blank=False, default=0)
     date = models.DateField(default=timezone.now, null=False, blank=False)
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='purchase')
-    p_payment = models.ManyToManyField('payments', related_name='purchase')
+    p_payment = models.ManyToManyField('payments', related_name='purchase', verbose_name='Payment')
+    user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.invoice_no
@@ -122,6 +129,7 @@ class warehouse_transfer(models.Model):
     warehouse_dest = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='warehouse_transfer_dest')
     comment = models.CharField(max_length=200, null=True, blank=True)
     date = models.DateField(default=timezone.now, null=False, blank=False)
+    user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return str(self.warehouse_source.name) + ' to ' + str(self.warehouse_dest.name)

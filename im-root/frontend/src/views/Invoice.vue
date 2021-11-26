@@ -17,6 +17,7 @@ export default {
     const productTable = ref(null);
     const grandTotal = ref(null);
     const invoiceType = ref(null);
+    const paymentType = ref(null);
 
     return {
       componentName,
@@ -33,6 +34,7 @@ export default {
       productTable,
       grandTotal,
       invoiceType,
+      paymentType,
     }
   },
   created() {
@@ -61,6 +63,7 @@ export default {
     this.invoiceNo = data.invoice_no;
     this.dateSelected = data.date;
     this.productTable = data.productAndQuantity;
+    this.paymentType = data.payment[0].payment_type;
   },
   methods: {
     getTotalPrice: function (row) {
@@ -111,7 +114,7 @@ export default {
                       <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                     </div>
                     <div class="col-6">
-                      <p></p>
+                      <p><strong>Paid By:</strong> {{paymentType}}</p>
                     </div>
                     <div class="col-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
@@ -120,7 +123,7 @@ export default {
                       <p></p>
                     </div>
                     <div class="col-6 text-right-align">
-                      <p><strong>Date:</strong>{{ dateSelected }}</p>
+                      <p><strong>Date: </strong>{{ dateSelected }}</p>
                     </div>
                   </div>
                 </div>
@@ -151,34 +154,6 @@ export default {
                       <td>{{ row.discount_in_percent }}</td>
                       <td>{{ getTotalPrice(row) }}</td>
                     </tr>
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product one-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product Two-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>

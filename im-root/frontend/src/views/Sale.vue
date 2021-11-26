@@ -38,7 +38,9 @@ export default {
     const productImage = ref(null);
     const warehouseList = ref(null);
     const productTable = ref(null);
+    const paymentType = ref(null);
 
+    paymentType.value = 'Cash';
     productTable.value = [];
     const today = new Date();
     dateSelected.value = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
@@ -119,6 +121,7 @@ export default {
       rawProductList,
       rawCustomerList,
       productTable,
+      paymentType,
     }
   },
   methods: {
@@ -234,7 +237,7 @@ export default {
       onePayment.debit_or_credit = "DEBIT";
       onePayment.amount = this.getGrandTotal();
       onePayment.date = this.dateSelected;
-      onePayment.payment_type = "CASH";
+      onePayment.payment_type = this.paymentType;
       onePayment.invoice_no = this.invoiceNo;
       if (this.selectedCustomer != null) {
         onePayment.customer = this.selectedCustomer.id;
@@ -270,6 +273,7 @@ export default {
       this.invoiceNo = '';
       this.paymentReceived = '';
       this.productTable = [];
+      this.paymentType = 'Cash';
     },
     isValidSale: function () {
       if (this.productTable.length == 0) {
@@ -445,6 +449,16 @@ export default {
                           </div>
                         </div>
                         <div class="form-group row">
+                          <label class="col-lg-4 col-form-label">Payment Type</label>
+                          <div class="col-lg-8">
+                            <select class="form-select" v-model="paymentType">
+                              <option value="Cash">Cash</option>
+                              <option value="Card">Card</option>
+                              <option value="bKash">bKash</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-group row">
                           <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
                           <div class="col-lg-8">
                             <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
@@ -492,7 +506,7 @@ export default {
                       <p><strong>Invoice Type:</strong> Customer</p>
                     </div>
                     <div class="col-lg-6">
-                      <p></p>
+                      <p><strong>Paid By:</strong> {{paymentType}}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
@@ -532,34 +546,6 @@ export default {
                       <td>{{ row.discount }}</td>
                       <td>{{ row.totalPrice }}</td>
                     </tr>
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product one-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product Two-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>

@@ -36,7 +36,7 @@ class m_product(models.Model):
     category = models.ForeignKey(m_category, null=True, blank=True, on_delete=models.CASCADE)
     default_purchase_price = models.FloatField(default=0, null=False, blank=False)
     default_sales_price = models.FloatField(default=0, null=False, blank=False)
-    minimum_quantity = models.FloatField(default=0, null=False, blank=False)
+    minimum_quantity = models.FloatField(default=0, null=False, blank=False, verbose_name='Critical Product Quantity')
     barcode = models.BigIntegerField(null=False, blank=False, primary_key=True)
     photo = models.ImageField(null=True, blank=True)
 

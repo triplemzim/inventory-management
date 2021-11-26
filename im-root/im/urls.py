@@ -24,6 +24,7 @@ urlpatterns = [
     path('master/', include('master.urls')),
     path('sale/', include('sale.urls')),
     path('api-auth', include('rest_framework.urls')),
+    path('users/', include('users.urls')),
     path(
         'accounts/register',
         RegistrationView.as_view(form_class=CustomUserForm, success_url='/'),
