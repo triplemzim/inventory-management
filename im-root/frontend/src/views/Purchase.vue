@@ -290,7 +290,7 @@ export default {
                   <div class="supplier-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Supplier</h6>
+                        <h5>Supplier</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -325,7 +325,7 @@ export default {
                   <div class="product-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Product</h6>
+                        <h5>Product</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -406,7 +406,7 @@ export default {
                   <div class="warehouse-info-box">
                     <div class="card">
                       <div class="card-header">
-                        <h6>Warehouse</h6>
+                        <h5>Warehouse</h5>
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
@@ -459,7 +459,7 @@ export default {
               <h5>Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
-                  <h6>{{ COMPANY_NAME }}</h6>
+                  <h5>{{ COMPANY_NAME }}</h5>
                   <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                 </div>
                 <div class="invoice-info">
@@ -595,6 +595,7 @@ export default {
 body,
 html {
   height: 100%;
+  font-size: 12px;
 }
 
 .supplier {
@@ -712,5 +713,9 @@ html {
   text-align: center;
   padding-bottom: 5px;
   border-bottom: 1px solid #ccc;
+}
+
+.col-form-label {
+  font-size: 12px;
 }
 </style>
