@@ -4,7 +4,7 @@ import {
   getNextOrPrevList,
   getProductList,
   getWarehouseList,
-  postTransfer
+  postTransfer, getStockListWithBarcode
 } from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings"
 
@@ -31,6 +31,7 @@ export default {
       productName: null,
       COMPANY_NAME,
       productTable: [],
+      stockAmount: null,
     }
   },
   async mounted() {
@@ -66,6 +67,7 @@ export default {
       this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
       this.barcode = selectedProduct.barcode;
       this.quantity = 1;
+      this.handleStock(this.barcode);
     },
     handleSelectProductWithBarcode: function (event) {
       event.preventDefault();
@@ -74,6 +76,12 @@ export default {
       if (selectedProduct == null) return;
       this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
       this.quantity = 1;
+      this.handleStock(this.barcode);
+    },
+    handleStock: async function (barcode) {
+      const stockList = await getStockListWithBarcode(barcode);
+      console.log(stockList.data);
+      this.stockAmount = stockList.data.find(x => x.warehouse === this.fromWarehouse).quantity;
     },
     addProduct: function () {
       const row = {};
@@ -93,6 +101,7 @@ export default {
       this.productName = '';
       this.quantity = 0;
       this.barcode = '';
+      this.stockAmount = null;
     },
     submitTransfer: async function () {
       if (!confirm("Do you confirm to submit Sale?")) {
@@ -187,18 +196,20 @@ export default {
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
-                          <label for="productName" class="col-lg-4 col-form-label">Product Name</label>
-                          <div class="col-lg-8">
-                            <input class="form-control" list="datalistOptions2" id="productName"
-                                   placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
-                                   v-bind:value="productName">
-                            <datalist id="datalistOptions2">
-                              <option v-for="item in productList" :key="item.id"
-                                      :value="item.product_name.name + ' - ' + item.category.name"/>
-                            </datalist>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productName" class="col-lg-4 col-form-label">Product Name</label>
+                              <div class="col-lg-8">
+                                <input class="form-control" list="datalistOptions2" id="productName"
+                                       placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
+                                       v-bind:value="productName">
+                                <datalist id="datalistOptions2">
+                                  <option v-for="item in productList" :key="item.id"
+                                          :value="item.product_name.name + ' - ' + item.category.name"/>
+                                </datalist>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                        <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
@@ -208,11 +219,22 @@ export default {
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label for="productQuantity" class="col-lg-4 col-form-label">Quantity</label>
                               <div class="col-lg-8">
                                 <input type="number" class="form-control" id="productQuantity" v-model="quantity">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="productStock" class="col-lg-4 col-form-label">In Stock</label>
+                              <div class="col-lg-8">
+                                <input type="number" readonly class="form-control" id="stockamount"
+                                       v-model="stockAmount">
                               </div>
                             </div>
                           </div>

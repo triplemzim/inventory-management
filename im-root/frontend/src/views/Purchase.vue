@@ -3,7 +3,7 @@
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {postPurchase} from "@/common/apis";
+import {getStockListWithBarcode, postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 import {getSupplierList, getProductList, getWarehouseList} from "@/common/apis";
 
@@ -40,6 +40,7 @@ export default {
     const productTable = ref(null);
     const paymentType = ref(null);
     const transactionId = ref(null);
+    const stockAmount = ref(null);
 
     paymentType.value = 'Cash';
 
@@ -125,6 +126,7 @@ export default {
       productTable,
       paymentType,
       transactionId,
+      stockAmount,
     }
   },
   methods: {
@@ -149,6 +151,7 @@ export default {
       this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
+      this.handleStock(this.barcode);
     },
     handleSelectProductWithBarcode: function (event) {
       console.log(this.componentName, event.target.value);
@@ -161,6 +164,12 @@ export default {
       this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
+      this.handleStock(this.barcode);
+    },
+    handleStock: async function (barcode) {
+      const stockList = await getStockListWithBarcode(barcode);
+      console.log(stockList.data);
+      this.stockAmount = stockList.data.find(x => x.warehouse === this.warehouse).quantity;
     },
     getTotalPrice: function () {
       if (this.barcode == null) return 0;
@@ -382,11 +391,22 @@ export default {
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label for="productQuantity" class="col-lg-4 col-form-label">Quantity</label>
                               <div class="col-lg-8">
                                 <input type="number" class="form-control" id="productQuantity" v-model="quantity">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="availableStock" class="col-lg-4 col-form-label">In Stock</label>
+                              <div class="col-lg-8">
+                                <input type="number" readonly class="form-control" id="stockAmount"
+                                       v-model="stockAmount">
                               </div>
                             </div>
                           </div>
@@ -537,7 +557,7 @@ export default {
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
                     <div class="col-6">
-                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{transactionId}}</p>
+                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{ transactionId }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>
