@@ -39,6 +39,7 @@ export default {
     const warehouseList = ref(null);
     const productTable = ref(null);
     const paymentType = ref(null);
+    const transactionId = ref(null);
 
     paymentType.value = 'Cash';
 
@@ -123,6 +124,7 @@ export default {
       rawSupplierList,
       productTable,
       paymentType,
+      transactionId,
     }
   },
   methods: {
@@ -245,6 +247,7 @@ export default {
       onePayment.date = this.dateSelected;
       onePayment.payment_type = this.paymentType;
       onePayment.invoice_no = this.invoiceNo;
+      onePayment.transaction_id = this.transactionId;
       if (this.selectedSupplier != null) {
         onePayment.supplier = this.selectedSupplier.id;
       }
@@ -477,6 +480,13 @@ export default {
                           <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
                           <div class="col-lg-8">
                             <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="transactionId" class="col-lg-4 col-form-label">Transaction ID</label>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="transactionId" v-model="transactionId"
+                                   :required="paymentType !== 'Cash'">
                           </div>
                         </div>
                       </div>
