@@ -36,7 +36,7 @@ class m_product(models.Model):
     category = models.ForeignKey(m_category, null=True, blank=True, on_delete=models.CASCADE)
     default_purchase_price = models.FloatField(default=0, null=False, blank=False)
     default_sales_price = models.FloatField(default=0, null=False, blank=False)
-    minimum_quantity = models.FloatField(default=0, null=False, blank=False)
+    minimum_quantity = models.FloatField(default=0, null=False, blank=False, verbose_name='Critical Product Quantity')
     barcode = models.BigIntegerField(null=False, blank=False, primary_key=True)
     photo = models.ImageField(null=True, blank=True)
 
@@ -47,8 +47,8 @@ class m_product(models.Model):
         return self.product_name.name + categoryName
 
     class Meta:
-        verbose_name = 'Product Details'
-        verbose_name_plural = 'All Product Details'
+        verbose_name = 'Product'
+        verbose_name_plural = 'Product List'
 
 
 class m_warehouse(models.Model):
@@ -143,3 +143,10 @@ class bank_transactions(models.Model):
     class Meta:
         verbose_name = 'Bank Transaction'
         verbose_name_plural = 'Bank Transactions'
+
+# class messages(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     message = models.CharField(max_length=300, null=False, blank=False)
+#     priority = models.PositiveIntegerField(default=1,null=False,blank=False)
+
+    

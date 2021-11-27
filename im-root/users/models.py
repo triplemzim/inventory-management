@@ -20,5 +20,5 @@ class user_profile(models.Model):
     user = models.ForeignKey(CustomUser, null=False, blank=False, related_name='user_profile', on_delete=models.CASCADE)
     photo = models.ImageField(null=True, blank=True)
     privilege = models.CharField(max_length=255, default='LEVEL_1', choices=PRIVILEGES, null=False, blank=False)
-    name = models.CharField(max_length=255, blank=False, null=False)
+    name = models.CharField(max_length=255, blank=True, null=True)
 

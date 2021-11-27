@@ -22,6 +22,18 @@ class PaymentsSerializer(serializers.ModelSerializer):
         model = payments
         fields = '__all__'
 
+    def create(self, validated_data):
+        try:
+            with transaction.atomic():
+                paymentObj = payments.objects.create(**validated_data)
+                paymentObj.user = self.context['request'].user
+                paymentObj.save()
+
+                return paymentObj
+        except Exception as e:
+            error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
+            raise serializers.ValidationError(error)
+
 class SaleSerializer(serializers.ModelSerializer):
     productAndQuantity = ProductAndQuantitySerializer(many=True, read_only=False)
     payment = PaymentsSerializer(many=True, read_only=False)
@@ -51,6 +63,8 @@ class SaleSerializer(serializers.ModelSerializer):
                 productAndQuantityData = validated_data.pop('productAndQuantity')
                 paymentObj = validated_data.pop('payment')
                 sales = sale.objects.create(**validated_data)
+                sales.user = self.context['request'].user
+                sales.save()
                 for pAndQ in productAndQuantityData:
                     temp = productAndQuantity.objects.create(**pAndQ)
                     sales.productAndQuantity.add(temp)
@@ -92,6 +106,8 @@ class PurchaseSerializer(serializers.ModelSerializer):
                 productAndQuantityData = validated_data.pop('productAndQuantity')
                 paymentObj = validated_data.pop('p_payment')
                 purchaseCreated = purchase.objects.create(**validated_data)
+                purchaseCreated.user = self.context['request'].user
+                purchaseCreated.save()
                 for pAndQ in productAndQuantityData:
                     temp = productAndQuantity.objects.create(**pAndQ)
                     purchaseCreated.productAndQuantity.add(temp)
@@ -142,6 +158,8 @@ class WarehouseTransferSerializer(serializers.ModelSerializer):
             with transaction.atomic():
                 products = validated_data.pop('product_list')
                 warehouseTransferObj = warehouse_transfer.objects.create(**validated_data)
+                warehouseTransferObj.user = self.context['request'].user
+                warehouseTransferObj.save()
                 for pAndQ in products:
                     temp = transfer_product.objects.create(**pAndQ)
                     warehouseTransferObj.product_list.add(temp)

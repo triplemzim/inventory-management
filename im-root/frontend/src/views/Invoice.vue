@@ -17,6 +17,8 @@ export default {
     const productTable = ref(null);
     const grandTotal = ref(null);
     const invoiceType = ref(null);
+    const paymentType = ref(null);
+    const transactionId = ref(null);
 
     return {
       componentName,
@@ -33,6 +35,8 @@ export default {
       productTable,
       grandTotal,
       invoiceType,
+      paymentType,
+      transactionId,
     }
   },
   created() {
@@ -47,6 +51,8 @@ export default {
       this.due = data.payment_due_gt;
       this.paymentReceived = data.payment_received_gt;
       this.grandTotal = data.payment_received_gt + data.payment_due_gt;
+      this.paymentType = data.payment[0].payment_type;
+      this.transactionId = data.payment[0].transaction_id;
     } else {
       this.customerName = data.supplier.name;
       this.address = data.supplier.address;
@@ -54,7 +60,8 @@ export default {
       this.due = data.payment_due_gt;
       this.paymentReceived = data.payment_paid_gt;
       this.grandTotal = data.payment_paid_gt + data.payment_due_gt;
-
+      this.paymentType = data.p_payment[0].payment_type;
+      this.transactionId = data.p_payment[0].transaction_id;
     }
 
     this.warehouse = data.warehouse.name;
@@ -111,16 +118,16 @@ export default {
                       <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                     </div>
                     <div class="col-6">
-                      <p></p>
+                      <p><strong>Paid By:</strong> {{paymentType}}</p>
                     </div>
                     <div class="col-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
                     <div class="col-6">
-                      <p></p>
+                      <p v-if="transactionId != null"><strong>Transaction ID: </strong> {{transactionId}}</p>
                     </div>
                     <div class="col-6 text-right-align">
-                      <p><strong>Date:</strong>{{ dateSelected }}</p>
+                      <p><strong>Date: </strong>{{ dateSelected }}</p>
                     </div>
                   </div>
                 </div>
@@ -151,34 +158,6 @@ export default {
                       <td>{{ row.discount_in_percent }}</td>
                       <td>{{ getTotalPrice(row) }}</td>
                     </tr>
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product one-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product Two-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>

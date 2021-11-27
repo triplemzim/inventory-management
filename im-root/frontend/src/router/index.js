@@ -4,6 +4,7 @@ import Sale from "../views/Sale";
 import Purchase from "../views/Purchase";
 import Invoice from "../views/Invoice";
 import WarehouseTransfer from "../views/WarehouseTransfer";
+import Payment from "../views/Payment";
 
 
 const routes = [
@@ -34,6 +35,11 @@ const routes = [
         name: "warehouseTransfer",
         component: WarehouseTransfer,
         path: "/warehouse-transfer/",
+    },
+    {
+        name: "payment",
+        component: Payment,
+        path: "/payment/",
     }
     // {
     //   path: "/about",
