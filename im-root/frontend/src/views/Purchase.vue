@@ -536,8 +536,8 @@ export default {
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
-                    <div class="col-lg-6">
-                      <p></p>
+                    <div class="col-6">
+                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{transactionId}}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>

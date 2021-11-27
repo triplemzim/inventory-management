@@ -480,7 +480,8 @@ export default {
                         <div class="form-group row">
                           <label for="transactionId" class="col-lg-4 col-form-label">Transaction ID</label>
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="transactionId" v-model="transactionId" :required="paymentType !== 'Cash'">
+                            <input type="text" class="form-control" id="transactionId" v-model="transactionId"
+                                   :required="paymentType !== 'Cash'">
                           </div>
                         </div>
                       </div>
@@ -530,8 +531,8 @@ export default {
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
-                    <div class="col-lg-6">
-                      <p></p>
+                    <div class="col-6">
+                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{ transactionId }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>
