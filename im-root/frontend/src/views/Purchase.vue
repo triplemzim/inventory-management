@@ -3,7 +3,7 @@
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {postPurchase} from "@/common/apis";
+import {getStockListWithBarcode, postPurchase} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
 import {getSupplierList, getProductList, getWarehouseList} from "@/common/apis";
 
@@ -38,6 +38,11 @@ export default {
     const productImage = ref(null);
     const warehouseList = ref(null);
     const productTable = ref(null);
+    const paymentType = ref(null);
+    const transactionId = ref(null);
+    const stockAmount = ref(null);
+
+    paymentType.value = 'Cash';
 
     productTable.value = [];
     const today = new Date();
@@ -119,6 +124,9 @@ export default {
       rawProductList,
       rawSupplierList,
       productTable,
+      paymentType,
+      transactionId,
+      stockAmount,
     }
   },
   methods: {
@@ -143,6 +151,7 @@ export default {
       this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
+      this.handleStock(this.barcode);
     },
     handleSelectProductWithBarcode: function (event) {
       console.log(this.componentName, event.target.value);
@@ -155,6 +164,12 @@ export default {
       this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
+      this.handleStock(this.barcode);
+    },
+    handleStock: async function (barcode) {
+      const stockList = await getStockListWithBarcode(barcode);
+      console.log(stockList.data);
+      this.stockAmount = stockList.data.find(x => x.warehouse === this.warehouse).quantity;
     },
     getTotalPrice: function () {
       if (this.barcode == null) return 0;
@@ -200,6 +215,7 @@ export default {
       this.productImage = '';
       this.barcode = '';
       this.price = 0;
+      this.paymentReceived = this.getGrandTotal();
     },
     getDateToday: function () {
       const today = new Date();
@@ -238,8 +254,9 @@ export default {
       onePayment.debit_or_credit = "CREDIT";
       onePayment.amount = this.getGrandTotal();
       onePayment.date = this.dateSelected;
-      onePayment.payment_type = "CASH";
+      onePayment.payment_type = this.paymentType;
       onePayment.invoice_no = this.invoiceNo;
+      onePayment.transaction_id = this.transactionId;
       if (this.selectedSupplier != null) {
         onePayment.supplier = this.selectedSupplier.id;
       }
@@ -262,7 +279,19 @@ export default {
       const response = await postPurchase(requestBody);
       if (response.status === 201) {
         alert('Purchase Record Complete!');
+        this.resetAll();
       }
+    },
+    resetAll: function () {
+      this.resetProduct();
+      this.selectedSupplier = '';
+      this.supplierName = '';
+      this.address = '';
+      this.contact = '';
+      this.invoiceNo = '';
+      this.paymentReceived = '';
+      this.productTable = [];
+      this.paymentType = 'Cash';
     },
     isValidPurchase: function () {
       if (this.productTable.length == 0) {
@@ -270,6 +299,11 @@ export default {
         return false;
       }
       return true;
+    },
+    deleteProduct: function () {
+      const idx = this.productTable.findIndex(x => x.barcode === this.barcode);
+      if (idx !== -1) this.productTable.splice(idx, 1);
+      this.resetProduct()
     }
   }
 };
@@ -357,11 +391,22 @@ export default {
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label for="productQuantity" class="col-lg-4 col-form-label">Quantity</label>
                               <div class="col-lg-8">
                                 <input type="number" class="form-control" id="productQuantity" v-model="quantity">
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label for="availableStock" class="col-lg-4 col-form-label">In Stock</label>
+                              <div class="col-lg-8">
+                                <input type="number" readonly class="form-control" id="stockAmount"
+                                       v-model="stockAmount">
                               </div>
                             </div>
                           </div>
@@ -396,6 +441,10 @@ export default {
                       </div>
                       <div class="card-footer">
                         <div class="product-button">
+                          <button class="btn btn-danger mx-2" :disabled="barcode == null || barcode === ''"
+                                  type="button"
+                                  @click="deleteProduct()">Delete
+                          </button>
                           <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
                         </div>
                       </div>
@@ -438,9 +487,26 @@ export default {
                           </div>
                         </div>
                         <div class="form-group row">
+                          <label class="col-lg-4 col-form-label">Payment Type</label>
+                          <div class="col-lg-8">
+                            <select class="form-select" v-model="paymentType">
+                              <option value="Cash">Cash</option>
+                              <option value="Card">Card</option>
+                              <option value="bKash">bKash</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="form-group row">
                           <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
                           <div class="col-lg-8">
                             <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label for="transactionId" class="col-lg-4 col-form-label">Transaction ID</label>
+                          <div class="col-lg-8">
+                            <input type="text" class="form-control" id="transactionId" v-model="transactionId"
+                                   :required="paymentType !== 'Cash'">
                           </div>
                         </div>
                       </div>
@@ -485,13 +551,13 @@ export default {
                       <p><strong>Invoice Type:</strong> Supplier</p>
                     </div>
                     <div class="col-lg-6">
-                      <p></p>
+                      <p><strong>Paid By:</strong> {{ paymentType }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
-                    <div class="col-lg-6">
-                      <p></p>
+                    <div class="col-6">
+                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{ transactionId }}</p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>
@@ -525,34 +591,6 @@ export default {
                       <td>{{ row.discount }}</td>
                       <td>{{ row.totalPrice }}</td>
                     </tr>
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product one-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
-                    <!--                    <tr>-->
-                    <!--                      <th scope="row">-->
-                    <!--                        <div class="product-name">-->
-                    <!--                          Product Two-->
-                    <!--                          <div class="product-name-hover">-->
-                    <!--                            <span><i class="bi bi-pencil-square"></i></span>-->
-                    <!--                          </div>-->
-                    <!--                        </div>-->
-                    <!--                      </th>-->
-                    <!--                      <td>2</td>-->
-                    <!--                      <td>100</td>-->
-                    <!--                      <td>10</td>-->
-                    <!--                      <td>90</td>-->
-                    <!--                    </tr>-->
                     </tbody>
                   </table>
                 </div>
