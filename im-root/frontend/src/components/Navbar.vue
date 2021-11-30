@@ -1,11 +1,18 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light my-navbar">
     <div class="container-fluid">
-      <router-link class="navbar-brand" :to="{ name: 'home'}">
+      <router-link class="navbar-brand" :to="{ name: 'home' }">
         স্বপ্নের ঠিকানা
       </router-link>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
@@ -14,7 +21,9 @@
             <a class="btn btn-outline-danger" href="/admin/">Admin</a>
           </li>
           <li class="nav-item">
-            <a class="btn btn-outline-success" href="/accounts/logout/">Logout</a>
+            <a class="btn btn-outline-success" href="/accounts/logout/"
+              >Logout</a
+            >
           </li>
         </ul>
       </div>
@@ -32,11 +41,11 @@ export default {
 .my-navbar {
   border-bottom: 1px solid #ddd;
 }
- .navbar-brand {
-   font-weight: bold;
-   font-size: 150%;
- }
- .navbar-brand:hover {
-   color: #dc3545 !important;
- }
+.navbar-brand {
+  font-weight: bold;
+  font-size: 150%;
+}
+.navbar-brand:hover {
+  color: #dc3545 !important;
+}
 </style>

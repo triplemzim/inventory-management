@@ -1,21 +1,26 @@
 from rest_framework import serializers
 from master.models import *
 
-class ProductNameSerializer(serializers.ModelSerializer):
+
+class BrandSerializer(serializers.ModelSerializer):
     class Meta:
-        model = m_product_name
-        fields = '__all__'
+        model = m_brand
+        exclude = ['id']
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = m_category
-        fields = '__all__'
+        exclude = ['id']
+
 
 class ProductSerializer(serializers.ModelSerializer):
-    product_name = ProductNameSerializer()
+    brand = BrandSerializer()
     category = CategorySerializer()
+
     class Meta:
         model = m_product
-        exclude = ['minimum_quantity']
+        exclude = ['minimum_quantity', 'id']
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
@@ -46,7 +51,6 @@ class BankSerializer(serializers.ModelSerializer):
     class Meta:
         model = m_bank
         fields = '__all__'
-
 
 
 class StocksSerializer(serializers.ModelSerializer):

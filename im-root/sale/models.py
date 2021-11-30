@@ -77,6 +77,7 @@ class productAndQuantity(models.Model):
     price = models.FloatField(default=0, null=False, blank=False)
     discount_in_percent = models.IntegerField(default=0, null=False, blank=False, verbose_name='Discount %')
     invoice_no = models.CharField(max_length=200, blank=False, null=False)
+    expiry_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return str(self.product) + '-' + str(self.quantity) + '-' + str(self.discount_in_percent) + '-' + str(
@@ -116,7 +117,7 @@ class transfer_product(models.Model):
     quantity = models.FloatField(null=False, blank=False, default=0)
 
     def __str__(self):
-        return str(self.product.product_name) + ' - ' + str(self.quantity)
+        return str(self.product) + ' - ' + str(self.quantity)
 
     class Meta:
         verbose_name = 'Transfer Product'

@@ -1,10 +1,11 @@
 from django.db import models
 import uuid
+from django.utils import timezone
 
 
 # Create your models here.
 
-class m_product_name(models.Model):
+class m_brand(models.Model):
     name = models.CharField(max_length=200, null=False, blank=False)
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
 
@@ -12,14 +13,13 @@ class m_product_name(models.Model):
         return self.name
 
     class Meta:
-        verbose_name = 'Product Name'
-        verbose_name_plural = 'Product Names'
+        verbose_name = 'Brand Name'
+        verbose_name_plural = 'Brand Names'
 
 
 class m_category(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     name = models.CharField(max_length=200, null=False, blank=False)
-    product_name = models.ForeignKey(m_product_name, on_delete=models.CASCADE, related_name='m_product_name')
 
     def __str__(self):
         return self.name
@@ -31,20 +31,26 @@ class m_category(models.Model):
 
 class m_product(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    product_name = models.ForeignKey(m_product_name, null=False, blank=False, on_delete=models.CASCADE,
-                                     related_name='m_product')
+    brand = models.ForeignKey(m_brand, null=False, blank=False, on_delete=models.CASCADE,
+                              related_name='m_product')
+    name = models.CharField(max_length=200, null=False, blank=False)
     category = models.ForeignKey(m_category, null=True, blank=True, on_delete=models.CASCADE)
     default_purchase_price = models.FloatField(default=0, null=False, blank=False)
     default_sales_price = models.FloatField(default=0, null=False, blank=False)
     minimum_quantity = models.FloatField(default=0, null=False, blank=False, verbose_name='Critical Product Quantity')
     barcode = models.BigIntegerField(null=False, blank=False, primary_key=True)
     photo = models.ImageField(null=True, blank=True)
+    date_created = models.DateField(default=timezone.now, null=True, blank=True)
 
     def __str__(self):
         categoryName = ''
+        brandName = ''
+
         if self.category:
             categoryName = ' - ' + self.category.name
-        return self.product_name.name + categoryName
+        if self.brand:
+            brandName = self.brand.name + ' - '
+        return brandName + self.name + categoryName
 
     class Meta:
         verbose_name = 'Product'
@@ -72,6 +78,7 @@ class m_customer(models.Model):
     contact = models.CharField(max_length=200, null=False, blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     photo = models.ImageField(null=True, blank=True)
+    custom_id = models.CharField(max_length=10, null=False, blank=False, default='GENERATING...')
 
     def __str__(self):
         return self.name
@@ -88,6 +95,7 @@ class m_supplier(models.Model):
     contact = models.CharField(max_length=200, null=False, blank=False)
     date_created = models.DateTimeField(auto_now_add=True)
     photo = models.ImageField(null=True, blank=True)
+    custom_id = models.CharField(max_length=10, null=False, blank=False, default='GENERATING...')
 
     def __str__(self):
         return self.name
@@ -117,14 +125,18 @@ class stocks(models.Model):
     product = models.ForeignKey(m_product, on_delete=models.CASCADE, related_name='stocks')
     warehouse = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='stocks')
     quantity = models.FloatField(default=0, null=False, blank=False)
+    expiry_date = models.DateField(null=True, blank=True)
+    batch_id = models.CharField(max_length=15, default=format(1, '10d'), blank=False, null=False)
+    date_created = models.DateField(default=timezone.now, null=False, blank=False)
 
     def __str__(self):
-        return self.product.product_name.name + ' in ' + self.warehouse.name
+        return self.product.name + ' in ' + self.warehouse.name
 
     class Meta:
         verbose_name = 'Stock'
         verbose_name_plural = 'Stocks'
-        unique_together = (('product', 'warehouse'),)
+        unique_together = (('product', 'warehouse', 'batch_id'),)
+        ordering = ['batch_id', '-quantity', 'date_created']
 
 
 class bank_transactions(models.Model):
@@ -144,9 +156,15 @@ class bank_transactions(models.Model):
         verbose_name = 'Bank Transaction'
         verbose_name_plural = 'Bank Transactions'
 
+
 # class messages(models.Model):
 #     id = models.AutoField(primary_key=True)
 #     message = models.CharField(max_length=300, null=False, blank=False)
 #     priority = models.PositiveIntegerField(default=1,null=False,blank=False)
 
-    
+
+class auto_increments(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    batch_id = models.PositiveIntegerField(null=False, blank=False, default=1)
+    customer_id = models.PositiveIntegerField(null=False, blank=False, default=1)
+    supplier_id = models.PositiveIntegerField(null=False, blank=False, default=1)
