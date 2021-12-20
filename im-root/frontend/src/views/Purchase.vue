@@ -11,11 +11,14 @@ import {
   getWarehouseList,
 } from "@/common/apis";
 import utils from "@/common/util";
+import Datepicker from 'vue3-datepicker';
+
 
 export default {
   name: "Purchase",
   components: {
     // AutoComplete
+    Datepicker,
   },
   props: ["rootSupplierList", "rootProductList", "rootWarehouseList"],
   setup(props) {
@@ -51,20 +54,10 @@ export default {
     paymentType.value = "Cash";
 
     productTable.value = [];
-    const today = new Date();
-    dateSelected.value =
-      today.getDate() +
-      "/" +
-      (today.getMonth() + 1) +
-      "/" +
-      today.getFullYear();
+    dateSelected.value = new Date();
 
     onMounted(async () => {
       const returnData = [];
-      const jq = window.jQuery;
-      //DatePicker
-      jq("#warhouseDatepicker").datepicker();
-      jq("#productExpiryDatepicker").datepicker();
 
       // Supplier list
       let response = props.rootSupplierList;
@@ -155,6 +148,7 @@ export default {
       this.supplierName = this.selectedSupplier.name;
       this.address = this.selectedSupplier.address;
       this.contact = this.selectedSupplier.contact;
+      this.$refs.barcodeInput.focus();
     },
     handleSelectProduct: function (event) {
       console.log(this.componentName, event.target.value);
@@ -193,7 +187,13 @@ export default {
       const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
       console.log(stock.data);
       this.stockAmount = stock.data.quantity;
-      this.expiryDate = new Date(Date.parse(stock.data.expiry_date)).toLocaleDateString();
+      if(isNaN(Date.parse(stock.data.expiry_date))) {
+        this.expiryDate = null;
+      } else {
+        console.log(stock.data.expiry_date);
+        this.expiryDate = new Date(Date.parse(stock.data.expiry_date));
+      }
+      this.$refs.barcodeInput.focus();
     },
     getTotalPrice: function () {
       if (this.barcode == null) return 0;
@@ -209,6 +209,9 @@ export default {
       row.price = this.price;
       row.totalPrice = this.getTotalPrice();
       row.barcode = this.barcode;
+      console.log(this.expiryDate);
+      console.log('warehousedate', this.dateSelected);
+      row.expiryDate = this.expiryDate;
       const idx = this.productTable.findIndex(
         (x) => x.productName === row.productName
       );
@@ -242,7 +245,9 @@ export default {
       this.barcode = "";
       this.price = 0;
       this.paymentReceived = this.getGrandTotal();
-      this.expiryDate = '';
+      this.expiryDate = null;
+      this.stockAmount = '';
+      this.$refs.barcodeInput.focus();
     },
     getDateToday: function () {
       const today = new Date();
@@ -254,13 +259,15 @@ export default {
         today.getFullYear()
       );
     },
-    setProductFromTable: function (row) {
+    setProductFromTable: async function (row) {
       this.productName = row.productName;
       this.quantity = row.quantity;
       this.discount = row.discount;
       this.price = row.price;
       this.barcode = row.barcode;
+      await this.handleStock(this.barcode, this.warehouse);
       this.totalPrice = this.getTotalPrice();
+      this.expiryDate = row.expiryDate;
     },
     submitPurchase: async function () {
       if (!confirm("Do you confirm to submit Purchase?")) {
@@ -305,6 +312,7 @@ export default {
         temp.quantity = x.quantity;
         temp.discount_in_percent = x.discount;
         temp.price = x.price;
+        temp.expiry_date = x.expiryDate;
         productList.push(temp);
       });
       requestBody.productAndQuantity = productList;
@@ -475,7 +483,7 @@ export default {
                                 >Barcode</label
                               >
                               <div class="col-lg-8">
-                                <input
+                                <input ref="barcodeInput"
                                   @keydown.enter.prevent="
                                     handleSelectProductWithBarcode($event)
                                   "
@@ -495,12 +503,12 @@ export default {
                                 >Expiry Date</label
                               >
                               <div class="col-lg-8">
-                                <input
-                                  type="text"
+                                <datepicker
                                   class="form-control"
                                   id="productExpiryDatepicker"
                                   v-model="expiryDate"
-                                  readonly
+                                  inputFormat="dd-MMM-yyyy"
+                                  clearable
                                 />
                               </div>
                             </div>
@@ -670,13 +678,14 @@ export default {
                             >Date</label
                           >
                           <div class="col-lg-8">
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="warhouseDatepicker"
-                              v-model="dateSelected"
-                              readonly
-                            />
+<!--                            <input-->
+<!--                              type="date"-->
+<!--                              class="form-control"-->
+<!--                              id="warehouseDatepicker"-->
+<!--                              v-model="dateSelected"-->
+<!--                              v-on:input="$event => {dateSelected = $event.target.value}"-->
+<!--                            />-->
+                            <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
                           </div>
                         </div>
                         <div class="form-group row">

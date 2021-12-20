@@ -18,7 +18,7 @@
     />
     <datalist id="datalistOptions">
       <option v-for="item in dataList" :key="item.id" :value="item.value">
-        {{ "Phone: " + item.id }}
+        {{ "Code: " + item.id }}
       </option>
     </datalist>
   </div>

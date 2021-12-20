@@ -11,12 +11,14 @@ import {
   getStockAndExpiryWithBarcode,
 } from "@/common/apis";
 import utils from "@/common/util";
+import Datepicker from 'vue3-datepicker';
 
 export default {
   name: "Sale",
   props: ["rootCustomerList", "rootProductList", "rootWarehouseList"],
   components: {
     // AutoComplete
+    Datepicker,
   },
   setup(props) {
     const customerList = ref(null);
@@ -50,19 +52,12 @@ export default {
 
     paymentType.value = "Cash";
     productTable.value = [];
-    const today = new Date();
-    dateSelected.value =
-      today.getDate() +
-      "/" +
-      (today.getMonth() + 1) +
-      "/" +
-      today.getFullYear();
+    dateSelected.value = new Date();
 
     onMounted(async () => {
       const returnData = [];
-      const jq = window.jQuery;
-      //DatePicker
-      jq("#warhouseDatepicker").datepicker();
+      // const jq = window.jQuery;
+      // jq("#warhouseDatepicker").datepicker({dateFormat: 'dd/mm/yy'});
 
       // Customer list
       let responseCustomer = props.rootCustomerList;
@@ -149,6 +144,7 @@ export default {
       this.customerName = this.selectedCustomer.name;
       this.address = this.selectedCustomer.address;
       this.contact = this.selectedCustomer.contact;
+      this.$refs.barcodeInput.focus();
     },
     handleSelectProduct: function (event) {
       console.log(this.componentName, event.target.value);
@@ -187,7 +183,12 @@ export default {
       const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
       console.log(stock.data);
       this.stockAmount = stock.data.quantity;
-      this.expiryDate = new Date(Date.parse(stock.data.expiry_date)).toLocaleDateString();
+      if(isNaN(Date.parse(stock.data.expiry_date))) {
+        this.expiryDate = null;
+      } else {
+        this.expiryDate = new Date(Date.parse(stock.data.expiry_date));
+      }
+      this.$refs.barcodeInput.focus();
     },
     getTotalPrice: function () {
       if (this.barcode == null) return 0;
@@ -237,7 +238,8 @@ export default {
       this.price = 0;
       this.paymentReceived = this.getGrandTotal();
       this.stockAmount = "";
-      this.expiryDate = '';
+      this.expiryDate = null;
+      this.$refs.barcodeInput.focus();
     },
     getDateToday: function () {
       const today = new Date();
@@ -255,6 +257,7 @@ export default {
       this.discount = row.discount;
       this.price = row.price;
       this.barcode = row.barcode;
+      this.handleStock(this.barcode, this.warehouse);
       this.totalPrice = this.getTotalPrice();
     },
     submitSale: async function () {
@@ -470,7 +473,7 @@ export default {
                                 >Barcode</label
                               >
                               <div class="col-lg-8">
-                                <input
+                                <input ref="barcodeInput"
                                   v-on:keydown.enter.prevent="
                                     handleSelectProductWithBarcode($event)
                                   "
@@ -490,12 +493,13 @@ export default {
                                 >Expiry Date</label
                               >
                               <div class="col-lg-8">
-                                <input
-                                  type="text"
+                                 <datepicker
                                   class="form-control"
-                                  id="productExpiry"
+                                  id="productExpiryDatepicker"
                                   v-model="expiryDate"
-                                  readonly
+                                  inputFormat="dd-MMM-yyyy"
+                                  clearable
+                                  disabled
                                 />
                               </div>
                             </div>
@@ -665,13 +669,7 @@ export default {
                             >Date</label
                           >
                           <div class="col-lg-8">
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="warhouseDatepicker"
-                              v-model="dateSelected"
-                              readonly
-                            />
+                            <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
                           </div>
                         </div>
                         <div class="form-group row">

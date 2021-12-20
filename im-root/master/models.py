@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.utils import timezone
+from django.db.models import Max
 
 
 # Create your models here.
@@ -119,15 +120,25 @@ class m_bank(models.Model):
         verbose_name = 'Bank'
         verbose_name_plural = 'Banks'
 
+class auto_increments(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    batch_id = models.PositiveIntegerField(null=False, blank=False, default=1)
+    customer_id = models.PositiveIntegerField(null=False, blank=False, default=1)
+    supplier_id = models.PositiveIntegerField(null=False, blank=False, default=1)
 
 class stocks(models.Model):
+    def getNewBatchId():
+        autoInc = auto_increments.objects.aggregate(batchId=Max('batch_id'))
+        auto_increments.objects.create(batch_id=autoInc['batchId'] + 1)
+        return format(autoInc['batchId'] + 1, '09d')
+
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     product = models.ForeignKey(m_product, on_delete=models.CASCADE, related_name='stocks')
     warehouse = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='stocks')
     quantity = models.FloatField(default=0, null=False, blank=False)
-    expiry_date = models.DateField(null=True, blank=True)
-    batch_id = models.CharField(max_length=15, default=format(1, '10d'), blank=False, null=False)
-    date_created = models.DateField(default=timezone.now, null=False, blank=False)
+    expiry_date = models.DateTimeField(null=True, blank=True)
+    batch_id = models.CharField(max_length=15, default=getNewBatchId(), blank=False, null=False)
+    date_created = models.DateTimeField(default=timezone.now, null=False, blank=False)
 
     def __str__(self):
         return self.product.name + ' in ' + self.warehouse.name
@@ -163,8 +174,3 @@ class bank_transactions(models.Model):
 #     priority = models.PositiveIntegerField(default=1,null=False,blank=False)
 
 
-class auto_increments(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
-    batch_id = models.PositiveIntegerField(null=False, blank=False, default=1)
-    customer_id = models.PositiveIntegerField(null=False, blank=False, default=1)
-    supplier_id = models.PositiveIntegerField(null=False, blank=False, default=1)

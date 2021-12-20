@@ -9,9 +9,13 @@ import {
 } from "@/common/apis";
 import { COMPANY_NAME } from "@/common/strings";
 import utils from "@/common/util";
+import Datepicker from "vue3-datepicker";
 
 export default {
   props: ["rootProductList", "rootWarehouseList"],
+  components: {
+    Datepicker,
+  },
   data() {
     const today = new Date();
 
@@ -44,9 +48,9 @@ export default {
     };
   },
   async mounted() {
-    const jq = window.jQuery;
-    //DatePicker
-    jq("#warhouseDatepicker").datepicker();
+    // const jq = window.jQuery;
+    // jq("#warhouseDatepicker").datepicker();
+
     const wtResponse = await getWarehouseTransferList();
     this.warehouseTransfers = wtResponse.data;
     console.log(
@@ -101,7 +105,12 @@ export default {
       const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
       console.log(stock.data);
       this.stockAmount = stock.data.quantity;
-      this.expiryDate = new Date(Date.parse(stock.data.expiry_date)).toLocaleDateString();
+      if(isNaN(Date.parse(stock.data.expiry_date))) {
+        this.expiryDate = '';
+      } else {
+        this.expiryDate = new Date(Date.parse(stock.data.expiry_date));
+      }
+      this.$refs.barcodeInput.focus();
     },
     addProduct: function () {
       if(this.quantity > this.stockAmount) {
@@ -129,6 +138,7 @@ export default {
       this.barcode = "";
       this.stockAmount = null;
       this.expiryDate = '';
+      this.$refs.barcodeInput.focus();
     },
     submitTransfer: async function () {
       if (!confirm("Do you confirm to submit Sale?")) {
@@ -261,7 +271,7 @@ export default {
                                 >Barcode</label
                               >
                               <div class="col-lg-8">
-                                <input
+                                <input ref="barcodeInput"
                                   @keydown.enter.prevent="
                                     handleSelectProductWithBarcode($event)
                                   "
@@ -390,13 +400,7 @@ export default {
                             >Date</label
                           >
                           <div class="col-lg-8">
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="warhouseDatepicker"
-                              v-model="dateSelected"
-                              readonly
-                            />
+                            <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
                           </div>
                         </div>
                         <div class="form-group row">

@@ -120,7 +120,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
         try:
             with transaction.atomic():
                 productAndQuantityData = validated_data.pop('productAndQuantity')
-                stockObj = validated_data.pop('stock')
+                paymentObj = validated_data.pop('p_payment')
                 purchaseCreated = purchase.objects.create(**validated_data)
                 purchaseCreated.user = self.context['request'].user
                 purchaseCreated.save()
@@ -189,8 +189,8 @@ class WarehouseTransferSerializer(serializers.ModelSerializer):
                                                                     product=transferProduct.product,
                                                                     batch_id=stock.batch_id,
                                                                     expiry_date=stock.expiry_date)
-                stockInDest = stocks.objects.create(warehouse=warehouseDest, product=transferProduct.product,
-                                                    batch_id=stock.batch_id)
+                # stockInDest = stocks.objects.create(warehouse=warehouseDest, product=transferProduct.product,
+                #                                     batch_id=stock.batch_id)
                 stockInDest.quantity = addedQuantity
                 stockInDest.save()
                 if remainingQuantity == 0:

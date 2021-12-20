@@ -20,7 +20,7 @@ class mCustomerAdmin(admin.ModelAdmin):
     readonly_fields = ('custom_id',)
 
 class stocksAdmin(admin.ModelAdmin):
-    list_display = ('product', 'warehouse', 'quantity')
+    list_display = ('product', 'warehouse', 'quantity', 'batch_id')
     search_fields = ['product__name']
     list_filter = ('warehouse', 'product')
     autocomplete_fields = ['product']
