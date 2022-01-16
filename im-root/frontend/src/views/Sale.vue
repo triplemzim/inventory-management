@@ -1,24 +1,32 @@
-Home.vue/* eslint-disable */
 <script>
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
 import {onMounted, ref} from "vue";
-import {postSale} from "@/common/apis";
 import {COMPANY_NAME} from "@/common/strings";
-import {getCustomerList, getProductList, getWarehouseList, getStockListWithBarcode} from "@/common/apis";
+import {
+  getCustomerList,
+  getProductList,
+  getWarehouseList,
+  postSale,
+  getStockAndExpiryWithBarcode,
+  salesmanAutocomplete,
+} from "@/common/apis";
+import utils from "@/common/util";
+import Datepicker from 'vue3-datepicker';
 
 export default {
   name: "Sale",
-  props: ['rootCustomerList', 'rootProductList', 'rootWarehouseList'],
+  props: ["rootCustomerList", "rootProductList", "rootWarehouseList"],
   components: {
     // AutoComplete
+    Datepicker,
   },
   setup(props) {
     const customerList = ref(null);
     const rawCustomerList = ref(null);
     const rawProductList = ref(null);
-    const selectedCustomer = ref('');
-    const componentName = ':home:';
+    const selectedCustomer = ref("");
+    const componentName = ":home:";
     const productList = ref(null);
     const address = ref(null);
     const contact = ref(null);
@@ -27,7 +35,7 @@ export default {
     const price = ref(null);
     const discount = ref(null);
     const totalPrice = ref(null);
-    const warehouse = ref('1');
+    const warehouse = ref("1");
     const invoiceNo = ref(null);
     const dateSelected = ref(null);
     const due = ref(null);
@@ -41,28 +49,33 @@ export default {
     const paymentType = ref(null);
     const transactionId = ref(null);
     const stockAmount = ref(null);
+    const expiryDate = ref(null);
+    const salesman = ref(null);
+    const salesmanList = ref(null);
+    const salesDiscount = ref(null);
+    const salesDiscountInPercent = ref(null);
+    const salesmanId = ref(null);
 
-    paymentType.value = 'Cash';
+    paymentType.value = "Cash";
     productTable.value = [];
-    const today = new Date();
-    dateSelected.value = today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+    dateSelected.value = new Date();
+    salesman.value = '';
 
     onMounted(async () => {
       const returnData = [];
-      const jq = window.jQuery;
-      //DatePicker
-      jq("#warhouseDatepicker").datepicker();
+      // const jq = window.jQuery;
+      // jq("#warhouseDatepicker").datepicker({dateFormat: 'dd/mm/yy'});
 
       // Customer list
       let responseCustomer = props.rootCustomerList;
       if (responseCustomer == null || responseCustomer.data == null) {
         responseCustomer = await getCustomerList();
       }
-      console.log(componentName, 'props-customer-list', responseCustomer);
-      responseCustomer.data.forEach(customer => {
+      console.log(componentName, "props-customer-list", responseCustomer);
+      responseCustomer.data.forEach((customer) => {
         const temp = {};
         temp.value = customer.name;
-        temp.id = customer.contact;
+        temp.id = customer.custom_id;
         returnData.push(temp);
       });
       rawCustomerList.value = responseCustomer.data;
@@ -74,23 +87,22 @@ export default {
       if (anotherResponse == null || anotherResponse.data == null) {
         anotherResponse = await getProductList();
       }
-      console.log(componentName, 'props-product-list', anotherResponse.data)
-      anotherResponse.data.forEach(product => {
+      console.log(componentName, "props-product-list", anotherResponse.data);
+      anotherResponse.data.forEach((product) => {
         const temp = {};
-        temp.value = product.product_name.name + ' - ' + product.category.name;
+        temp.value = utils.getProductRep(product);
         temp.id = product.barcode;
         productData.push(temp);
       });
       rawProductList.value = anotherResponse.data;
       productList.value = productData;
 
-
       //Warehouse-list
       let warehouseListResponse = props.rootWarehouseList;
       if (warehouseListResponse == null || warehouseListResponse.data == null) {
         warehouseListResponse = await getWarehouseList();
       }
-      console.log(componentName, 'warehouse-list', warehouseListResponse.data);
+      console.log(componentName, "warehouse-list", warehouseListResponse.data);
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
         warehouse.value = warehouseList.value[0].id;
@@ -126,65 +138,104 @@ export default {
       paymentType,
       transactionId,
       stockAmount,
-    }
+      utils,
+      expiryDate,
+      salesman,
+      salesmanId,
+      salesmanList,
+      salesDiscountInPercent,
+      salesDiscount,
+    };
   },
   methods: {
     handleSelectCustomer: function (customer) {
       if (customer == null) return;
-      this.selectedCustomer = this.rawCustomerList.find(x => x.contact === customer.id);
+      this.selectedCustomer = this.rawCustomerList.find(
+          (x) => x.custom_id === customer.id
+      );
       this.customerName = this.selectedCustomer.name;
       this.address = this.selectedCustomer.address;
       this.contact = this.selectedCustomer.contact;
+      this.$refs.barcodeInput.focus();
     },
     handleSelectProduct: function (event) {
       console.log(this.componentName, event.target.value);
-      const selectedProduct = this.rawProductList.find(x => x.product_name.name + ' - ' + x.category.name === event.target.value);
+      const selectedProduct = this.rawProductList.find(
+          (x) => utils.getProductRep(x) === event.target.value
+      );
       // if(selectedProduct == null) {
       //   selectedProduct = this.rawProductList.find(x => x.barcode === event.target.value);
       // }
       if (selectedProduct == null) return;
-      this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
+      this.productName = utils.getProductRep(selectedProduct);
       this.productImage = selectedProduct.photo;
       this.barcode = selectedProduct.barcode;
       this.quantity = 1;
       this.price = selectedProduct.default_sales_price;
       this.discount = 0;
       this.totalPrice = this.price;
-      this.handleStock(this.barcode);
+      this.handleStock(this.barcode, this.warehouse);
     },
-    handleSelectProductWithBarcode: function (event) {
-      console.log(this.componentName, event.target.value);
-      const selectedProduct = this.rawProductList.find(x => x.barcode.toString() === event.target.value.toString());
+    handleSelectProductWithBarcode: async function (event) {
+      if(event.target.value.toString().trim() == '') return;
+
+      const splittedCode = event.target.value.toString().split('_');
+      this.barcode = splittedCode[0].trim();
+      let expiryString = null;
+      if(splittedCode.length > 1) {
+        expiryString = splittedCode[1].trim();
+      }
+
+      const selectedProduct = this.rawProductList.find(
+          (x) => x.barcode.toString() === this.barcode
+      );
       console.log(selectedProduct);
       if (selectedProduct == null) return;
-      this.productName = selectedProduct.product_name.name + ' - ' + selectedProduct.category.name;
+      this.productName = utils.getProductRep(selectedProduct);
       this.productImage = selectedProduct.photo;
       this.quantity = 1;
       this.price = selectedProduct.default_sales_price;
       this.discount = 0;
       this.totalPrice = this.price;
-      this.handleStock(this.barcode);
+      await this.handleStock(this.barcode, this.warehouse);
+      if(expiryString != null) {
+        this.expiryDate = new Date(Date.parse(expiryString));
+        console.log('parsed date: ', new Date(Date.parse(expiryString)));
+      }
     },
-    handleStock: async function (barcode) {
-      const stockList = await getStockListWithBarcode(barcode);
-      console.log(stockList.data);
-      this.stockAmount = stockList.data.find(x => x.warehouse === this.warehouse).quantity;
+    handleStock: async function (barcode, whouse) {
+      const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
+      console.log(stock.data);
+      this.stockAmount = stock.data.quantity;
+      if (isNaN(Date.parse(stock.data.expiry_date))) {
+        this.expiryDate = null;
+      } else {
+        this.expiryDate = new Date(Date.parse(stock.data.expiry_date));
+      }
+      this.$refs.barcodeInput.focus();
     },
     getTotalPrice: function () {
       if (this.barcode == null) return 0;
       let totalPrice = this.price * this.quantity;
-      totalPrice = totalPrice - totalPrice * this.discount / 100.0;
+      totalPrice = totalPrice - (totalPrice * this.discount) / 100.0;
       return totalPrice;
     },
     addProduct: function () {
       const row = {};
+      if (this.quantity > this.stockAmount) {
+        alert('Product low in stock!');
+        return;
+      }
       row.productName = this.productName;
       row.quantity = this.quantity;
       row.discount = this.discount;
+      row.salesDiscount = this.salesDiscount;
       row.price = this.price;
       row.totalPrice = this.getTotalPrice();
       row.barcode = this.barcode;
-      const idx = this.productTable.findIndex(x => x.productName === row.productName);
+      const idx = this.productTable.findIndex(
+          (x) => x.productName === row.productName
+      );
       if (idx !== -1) this.productTable.splice(idx, 1);
       if (row.quantity === 0) return;
       this.productTable.push(row);
@@ -194,8 +245,13 @@ export default {
     },
     getGrandTotal: function () {
       let gt = 0;
-      this.productTable.forEach(x => gt = gt + x.totalPrice);
+      this.productTable.forEach((x) => (gt = gt + x.totalPrice));
       return Math.floor(gt);
+    },
+    getTotalComission: function () {
+      let tc = 0;
+      this.productTable.forEach(x => tc = tc + x.salesDiscount);
+      return tc;
     },
     getAmountDue: function () {
       // return Number.parseFloat(this.getGrandTotal() - this.paymentReceived).toFixed(2);
@@ -204,18 +260,27 @@ export default {
       return due;
     },
     resetProduct: function () {
-      this.productName = '';
+      this.productName = "";
       this.quantity = 0;
       this.discount = 0;
-      this.productImage = '';
-      this.barcode = '';
+      this.productImage = "";
+      this.barcode = "";
       this.price = 0;
       this.paymentReceived = this.getGrandTotal();
-      this.stockAmount = '';
+      this.stockAmount = "";
+      this.expiryDate = null;
+      this.$refs.barcodeInput.focus();
+      this.salesDiscountInPercent = 0;
     },
     getDateToday: function () {
       const today = new Date();
-      return today.getDate() + '/' + (today.getMonth() + 1) + '/' + today.getFullYear();
+      return (
+          today.getDate() +
+          "/" +
+          (today.getMonth() + 1) +
+          "/" +
+          today.getFullYear()
+      );
     },
     setProductFromTable: function (row) {
       this.productName = row.productName;
@@ -223,6 +288,7 @@ export default {
       this.discount = row.discount;
       this.price = row.price;
       this.barcode = row.barcode;
+      this.handleStock(this.barcode, this.warehouse);
       this.totalPrice = this.getTotalPrice();
     },
     submitSale: async function () {
@@ -239,6 +305,7 @@ export default {
       requestBody.payment_received_gt = this.paymentReceived;
       requestBody.payment_due_gt = this.getAmountDue();
       requestBody.date = this.dateSelected;
+      requestBody.salesman = this.salesmanId;
       if (this.selectedCustomer != null) {
         requestBody.customer = this.selectedCustomer.id;
       }
@@ -261,47 +328,76 @@ export default {
 
       // Products
       const productList = [];
-      this.productTable.forEach(x => {
+      this.productTable.forEach((x) => {
         const temp = {};
         temp.product = x.barcode;
         temp.invoice_no = this.invoiceNo;
         temp.quantity = x.quantity;
         temp.discount_in_percent = x.discount;
         temp.price = x.price;
+        temp.salesman_discount = x.salesDiscount;
         productList.push(temp);
       });
       requestBody.productAndQuantity = productList;
-      console.log(this.componentName, 'sale-payload: ', JSON.stringify(requestBody));
+      console.log(
+          this.componentName,
+          "sale-payload: ",
+          JSON.stringify(requestBody)
+      );
       const response = await postSale(requestBody);
       if (response.status === 201) {
-        alert('Sale Record Complete!');
+        alert("Sale Record Complete!");
         this.resetAll();
       }
     },
     resetAll: function () {
       this.resetProduct();
-      this.selectedCustomer = '';
-      this.customerName = '';
-      this.address = '';
-      this.contact = '';
-      this.invoiceNo = '';
-      this.paymentReceived = '';
+      this.selectedCustomer = "";
+      this.customerName = "";
+      this.address = "";
+      this.contact = "";
+      this.invoiceNo = "";
+      this.paymentReceived = "";
       this.productTable = [];
-      this.paymentType = 'Cash';
+      this.paymentType = "Cash";
     },
     isValidSale: function () {
       if (this.productTable.length == 0) {
-        alert('Please add some product!');
+        alert("Please add some product!");
         return false;
       }
       return true;
     },
     deleteProduct: function () {
-      const idx = this.productTable.findIndex(x => x.barcode === this.barcode);
+      const idx = this.productTable.findIndex(
+          (x) => x.barcode === this.barcode
+      );
       if (idx !== -1) this.productTable.splice(idx, 1);
-      this.resetProduct()
+      this.resetProduct();
+    },
+    handleSalesmanInput: async function (event) {
+      if (event.target.value == '') {
+        return;
+      }
+      this.salesman = event.target.value;
+      this.salesmanId = null;
+      const response = await salesmanAutocomplete(utils.getSalesmanName(event.target.value));
+      this.salesmanList = response.data
+      if (this.salesmanList == null) return;
+
+      const selectedItem = this.salesmanList.find(
+          (x) => utils.getSalesmanRep(x) === event.target.value
+      );
+
+      if (selectedItem == null) return;
+
+      this.salesman= utils.getSalesmanRep(selectedItem);
+      this.salesmanId = selectedItem.id;
+    },
+    calculateSalesDiscount: function () {
+      this.salesDiscount = (this.getTotalPrice() * this.salesDiscountInPercent) / 100.0;
     }
-  }
+  },
 };
 </script>
 
@@ -324,34 +420,90 @@ export default {
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
-                          <AutoComplete :dataList="customerList" :title="'Search Customer'"
-                                        @selectedData="handleSelectCustomer" key="customer" :bindValue="customerName"/>
+                          <AutoComplete
+                              :dataList="customerList"
+                              :title="'Search Customer'"
+                              @selectedData="handleSelectCustomer"
+                              key="customer"
+                              :bindValue="customerName"
+                          />
                         </div>
                         <div class="form-group row">
-                          <label for="customerAddress" class="col-lg-4 col-form-label">Customer Name</label>
+                          <label
+                              for="customerAddress"
+                              class="col-lg-4 col-form-label"
+                          >Customer Name</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" required class="form-control" id="customerName" v-model="customerName">
+                            <input
+                                type="text"
+                                required
+                                class="form-control"
+                                id="customerName"
+                                v-model="customerName"
+                            />
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="customerAddress" class="col-lg-4 col-form-label">Address</label>
+                          <label
+                              for="customerAddress"
+                              class="col-lg-4 col-form-label"
+                          >Address</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="customerAddress" v-model="address">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="customerAddress"
+                                v-model="address"
+                            />
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="customerContact" class="col-lg-4 col-form-label">Contact</label>
+                          <label
+                              for="customerContact"
+                              class="col-lg-4 col-form-label"
+                          >Contact</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" required class="form-control" id="customerContact" v-model="contact">
+                            <input
+                                type="text"
+                                required
+                                class="form-control"
+                                id="customerContact"
+                                v-model="contact"
+                            />
+                          </div>
+                        </div>
+                        <div class="form-group row">
+                          <label
+                              for="productName"
+                              class="col-lg-4 col-form-label"
+                          >Salesman</label>
+                          <div class="col-lg-8">
+                            <input
+                                class="form-control"
+                                list="datalistOptions3"
+                                id="Salesman"
+                                placeholder="Type to search..."
+                                v-on:input="handleSalesmanInput($event)"
+                                v-bind:value="salesman"
+                                autocomplete="off"
+                            />
+                            <datalist id="datalistOptions3">
+                              <option
+                                  v-for="item in salesmanList"
+                                  :key="item.custom_id"
+                                  :value="utils.getSalesmanRep(item)"
+                              />
+                            </datalist>
                           </div>
                         </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
                 <div class="product-information">
-
                   <div class="product-info-box">
                     <div class="card">
                       <div class="card-header">
@@ -359,13 +511,27 @@ export default {
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
-                          <label for="productName" class="col-lg-4 col-form-label">Product Name</label>
+                          <label
+                              for="productName"
+                              class="col-lg-4 col-form-label"
+                          >Product Name</label
+                          >
                           <div class="col-lg-8">
-                            <input class="form-control" list="datalistOptions2" id="productName"
-                                   placeholder="Type to search..." v-on:input="handleSelectProduct($event)"
-                                   v-bind:value="productName">
+                            <input
+                                class="form-control"
+                                list="datalistOptions2"
+                                id="productName"
+                                placeholder="Type to search..."
+                                v-on:input="handleSelectProduct($event)"
+                                v-bind:value="productName"
+                                autocomplete="off"
+                            />
                             <datalist id="datalistOptions2">
-                              <option v-for="item in productList" :key="item.id" :value="item.value"/>
+                              <option
+                                  v-for="item in productList"
+                                  :key="item.id"
+                                  :value="item.value"
+                              />
                             </datalist>
                           </div>
                         </div>
@@ -374,16 +540,47 @@ export default {
                             <p>Product Image</p>
                           </div>
                           <div class="col-lg-8">
-                            <img src="{{ productImage }}" class="">
+                            <img src="{{ productImage }}" class=""/>
                           </div>
                         </div>
                         <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="productBarcode" class="col-lg-4 col-form-label">Barcode</label>
+                              <label
+                                  for="productBarcode"
+                                  class="col-lg-4 col-form-label"
+                              >Barcode</label
+                              >
                               <div class="col-lg-8">
-                                <input v-on:keydown.enter.prevent="handleSelectProductWithBarcode($event)" type="text"
-                                       class="form-control" id="productBarcode" v-model="barcode">
+                                <input ref="barcodeInput"
+                                       v-on:keydown.enter.prevent="
+                                    handleSelectProductWithBarcode($event)
+                                  "
+                                       type="text"
+                                       class="form-control"
+                                       id="productBarcode"
+                                       v-model="barcode"
+                                       autocomplete="off"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label
+                                  for="productExpiry"
+                                  class="col-lg-4 col-form-label"
+                              >Expiry Date</label
+                              >
+                              <div class="col-lg-8">
+                                <datepicker
+                                    class="form-control"
+                                    id="productExpiryDatepicker"
+                                    v-model="expiryDate"
+                                    inputFormat="dd-MMM-yyyy"
+                                    disabled
+                                    v-bind:style="expiryDate == '' || expiryDate > new Date() ? '' : 'border-color: red'"
+                                />
                               </div>
                             </div>
                           </div>
@@ -391,17 +588,36 @@ export default {
                         <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="productQuantity" class="col-lg-4 col-form-label">Quantity</label>
+                              <label
+                                  for="productQuantity"
+                                  class="col-lg-4 col-form-label"
+                              >Quantity</label
+                              >
                               <div class="col-lg-8">
-                                <input type="number" class="form-control" id="productQuantity" v-model="quantity">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="productQuantity"
+                                    v-model="quantity"
+                                />
                               </div>
                             </div>
                           </div>
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="availableStock" class="col-lg-4 col-form-label">In Stock</label>
+                              <label
+                                  for="availableStock"
+                                  class="col-lg-4 col-form-label"
+                              >In Stock</label
+                              >
                               <div class="col-lg-8">
-                                <input type="number" readonly class="form-control" id="stockAmount" v-model="stockAmount">
+                                <input
+                                    type="number"
+                                    readonly
+                                    class="form-control"
+                                    id="stockAmount"
+                                    v-model="stockAmount"
+                                />
                               </div>
                             </div>
                           </div>
@@ -409,26 +625,93 @@ export default {
                         <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="productPrice" class="col-lg-4 col-form-label">Price</label>
+                              <label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >Price</label
+                              >
                               <div class="col-lg-8">
-                                <input type="text" class="form-control" id="productPrice" v-model="price">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="productPrice"
+                                    v-model="price"
+                                />
                               </div>
                             </div>
                           </div>
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="productDiscount" class="col-lg-4 col-form-label">Discount (%)</label>
+                              <label
+                                  for="productDiscount"
+                                  class="col-lg-4 col-form-label"
+                              >Discount (%)</label
+                              >
                               <div class="col-lg-8">
-                                <input type="number" class="form-control" id="productDiscount" v-model="discount">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="productDiscount"
+                                    v-model="discount"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >Commission (%) </label
+                              >
+                              <div class="col-lg-8">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="sales_discount"
+                                    v-on:input="calculateSalesDiscount()"
+                                    v-model="salesDiscountInPercent"
+                                />
                               </div>
                             </div>
                           </div>
                           <div class="col-lg-6">
                             <div class="form-group row">
-                              <label for="productPrice" class="col-lg-4 col-form-label">Total Price</label>
+                              <label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >In BDT</label
+                              >
                               <div class="col-lg-8">
-                                <input type="number" class="form-control" id="productPrice" readonly
-                                       v-bind:value="getTotalPrice()">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="sales_discount"
+                                    readonly
+                                    v-model="salesDiscount"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <div class="form-group row">
+                              <label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >Total Price</label
+                              >
+                              <div class="col-lg-8">
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="productPrice"
+                                    readonly
+                                    v-bind:value="getTotalPrice()"
+                                />
                               </div>
                             </div>
                           </div>
@@ -436,11 +719,21 @@ export default {
                       </div>
                       <div class="card-footer">
                         <div class="product-button">
-                          <button class="btn btn-danger mx-2" :disabled="barcode == null || barcode === ''"
-                                  type="button"
-                                  @click="deleteProduct()">Delete
+                          <button
+                              class="btn btn-danger mx-2"
+                              :disabled="barcode == null || barcode === ''"
+                              type="button"
+                              @click="deleteProduct()"
+                          >
+                            Delete
                           </button>
-                          <button class="btn btn-success" type="button" @click="addProduct()">Add / Update</button>
+                          <button
+                              class="btn btn-success"
+                              type="button"
+                              @click="addProduct()"
+                          >
+                            Add / Update
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -454,13 +747,18 @@ export default {
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
-                          <label class="col-lg-4 col-form-label">Warehouse Name</label>
+                          <label class="col-lg-4 col-form-label"
+                          >Warehouse Name</label
+                          >
                           <div class="col-lg-8">
                             <select class="form-select" v-model="warehouse">
                               <!--                        <option selected value="4">Warhouse One</option>-->
-                              <option v-for="whouse in warehouseList" :key="whouse.id" :value="whouse.id">{{
-                                  whouse.name
-                                }}
+                              <option
+                                  v-for="whouse in warehouseList"
+                                  :key="whouse.id"
+                                  :value="whouse.id"
+                              >
+                                {{ whouse.name }}
                               </option>
                               <!--                        <option value="1">Warhouse Two</option>-->
                               <!--                        <option value="2">Warhouse Three</option>-->
@@ -469,20 +767,35 @@ export default {
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="warehouseInvoice" class="col-lg-4 col-form-label">Invoice No</label>
+                          <label
+                              for="warehouseInvoice"
+                              class="col-lg-4 col-form-label"
+                          >Invoice No</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" required class="form-control" id="warehouseInvoice" v-model="invoiceNo">
+                            <input
+                                type="text"
+                                required
+                                class="form-control"
+                                id="warehouseInvoice"
+                                v-model="invoiceNo"
+                            />
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="warehouseDate" class="col-lg-4 col-form-label">Date</label>
+                          <label
+                              for="warehouseDate"
+                              class="col-lg-4 col-form-label"
+                          >Date</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="warhouseDatepicker" v-model="dateSelected"
-                                   readonly/>
+                            <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label class="col-lg-4 col-form-label">Payment Type</label>
+                          <label class="col-lg-4 col-form-label"
+                          >Payment Type</label
+                          >
                           <div class="col-lg-8">
                             <select class="form-select" v-model="paymentType">
                               <option value="Cash">Cash</option>
@@ -492,21 +805,38 @@ export default {
                           </div>
                         </div>
                         <div class="form-group row">
-                          <label for="warehousePayment" class="col-lg-4 col-form-label">Payment</label>
+                          <label
+                              for="warehousePayment"
+                              class="col-lg-4 col-form-label"
+                          >Payment</label
+                          >
                           <div class="col-lg-8">
-                            <input type="number" class="form-control" id="warhousePayment" v-model="paymentReceived">
+                            <input
+                                type="number"
+                                class="form-control"
+                                id="warhousePayment"
+                                v-model="paymentReceived"
+                            />
                           </div>
                         </div>
-                        <div class="form-group row">
-                          <label for="transactionId" class="col-lg-4 col-form-label">Transaction ID</label>
+                        <div class="form-group row" v-if="paymentType != 'Cash'">
+                          <label
+                              for="transactionId"
+                              class="col-lg-4 col-form-label"
+                          >Transaction ID</label
+                          >
                           <div class="col-lg-8">
-                            <input type="text" class="form-control" id="transactionId" v-model="transactionId"
-                                   :required="paymentType !== 'Cash'">
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transactionId"
+                                v-model="transactionId"
+                                :required="paymentType !== 'Cash'"
+                            />
                           </div>
                         </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
                 <div class="sell-submit-btn">
@@ -552,7 +882,9 @@ export default {
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
                     <div class="col-6">
-                      <p v-if="paymentType !== 'Cash'"><strong>Transaction ID: </strong> {{ transactionId }}</p>
+                      <p v-if="paymentType !== 'Cash'">
+                        <strong>Transaction ID: </strong> {{ transactionId }}
+                      </p>
                     </div>
                     <div class="col-lg-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>
@@ -561,18 +893,23 @@ export default {
                 </div>
                 <div class="invoice-table">
                   <h5>Product List</h5>
-                  <table class="table table-bordered ">
+                  <table class="table table-bordered">
                     <thead class="card-header">
                     <tr>
                       <th scope="col">Name</th>
                       <th scope="col">Quantity</th>
                       <th scope="col">Price</th>
                       <th scope="col">Discount</th>
+                      <th scope="col">Commission</th>
                       <th scope="col">Total</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="row in productTable" :key="row.barcode" @click="setProductFromTable(row)">
+                    <tr
+                        v-for="row in productTable"
+                        :key="row.barcode"
+                        @click="setProductFromTable(row)"
+                    >
                       <th scope="row">
                         <div class="product-name">
                           {{ row.productName }}
@@ -584,6 +921,7 @@ export default {
                       <td>{{ row.quantity }}</td>
                       <td>{{ row.price }}</td>
                       <td>{{ row.discount }}</td>
+                      <td>{{ row.salesDiscount }}</td>
                       <td>{{ row.totalPrice }}</td>
                     </tr>
                     </tbody>
@@ -606,6 +944,10 @@ export default {
                           <td><strong>Amount Due:</strong></td>
                           <td>{{ getAmountDue() }}</td>
                         </tr>
+                        <tr>
+                          <td><strong>Total Commission:</strong></td>
+                          <td>{{ getTotalComission() }}</td>
+                        </tr>
                         </tbody>
                       </table>
                     </div>
@@ -620,7 +962,6 @@ export default {
   </div>
 </template>
 
-
 <style>
 /*
 ===== Customer Page CSS ==========
@@ -634,7 +975,6 @@ html {
 .customer {
   padding: 50px 0;
 }
-
 
 .customer-info-box,
 .product-info-box,
@@ -673,7 +1013,7 @@ html {
   right: 0;
   visibility: hidden;
   opacity: 0;
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .product-name-hover span {

@@ -15,7 +15,7 @@ class saleAdmin(admin.ModelAdmin):
 
 class productAndQuantityAdmin(admin.ModelAdmin):
     list_display = ('product', 'quantity', 'invoice_no')
-    search_fields = ['product__product_name__name']
+    search_fields = ['product__name']
     autocomplete_fields = ['product']
 
 class purchaseAdmin(admin.ModelAdmin):
@@ -26,11 +26,11 @@ class purchaseAdmin(admin.ModelAdmin):
 class warehouseTransferAdmin(admin.ModelAdmin):
     list_display = ('warehouse_source', 'warehouse_dest', 'date')
     list_filter = ('warehouse_source', 'warehouse_dest')
-    search_fields = ['product__product__product_name__name']
+    search_fields = ['product__product__name']
 
 class transferProductAdmin(admin.ModelAdmin):
     list_display = ('product', 'quantity')
-    search_fields = ['product__product_name__name']
+    search_fields = ['product__name']
 
 admin.site.register(payments, paymentModel)
 admin.site.register(sale, saleAdmin)

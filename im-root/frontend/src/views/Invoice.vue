@@ -1,10 +1,10 @@
 <script>
-import {ref} from "vue";
-import {COMPANY_NAME} from "@/common/strings";
-
+import { ref } from "vue";
+import { COMPANY_NAME } from "@/common/strings";
+import utils from "@/common/util";
 export default {
   setup() {
-    const componentName = ':invoice:';
+    const componentName = ":invoice:";
     const address = ref(null);
     const contact = ref(null);
     const totalPrice = ref(null);
@@ -37,14 +37,15 @@ export default {
       invoiceType,
       paymentType,
       transactionId,
-    }
+      utils,
+    };
   },
   created() {
     const data = JSON.parse(this.$route.params.invoice);
     console.log(data);
     this.invoiceType = this.$route.params.type;
 
-    if (this.invoiceType === 'Sale Invoice') {
+    if (this.invoiceType === "Sale Invoice") {
       this.customerName = data.customer.name;
       this.address = data.customer.address;
       this.contact = data.customer.contact;
@@ -66,13 +67,13 @@ export default {
 
     this.warehouse = data.warehouse.name;
     this.invoiceNo = data.invoice_no;
-    this.dateSelected = data.date;
+    this.dateSelected = new Date(Date.parse(data.date)).toLocaleDateString();
     this.productTable = data.productAndQuantity;
   },
   methods: {
     getTotalPrice: function (row) {
       let priceNoDic = row.price * row.quantity;
-      return priceNoDic - (priceNoDic * row.discount_in_percent / 100.0);
+      return priceNoDic - (priceNoDic * row.discount_in_percent) / 100.0;
     },
     // getGrandTotal: function () {
     //   let sum = 0;
@@ -81,8 +82,8 @@ export default {
     //   });
     //   return Math.floor(sum);
     // }
-  }
-}
+  },
+};
 </script>
 
 <template>
@@ -118,13 +119,15 @@ export default {
                       <p><strong>Registration no:</strong> [Reg No/Vat No]</p>
                     </div>
                     <div class="col-6">
-                      <p><strong>Paid By:</strong> {{paymentType}}</p>
+                      <p><strong>Paid By:</strong> {{ paymentType }}</p>
                     </div>
                     <div class="col-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
                     <div class="col-6">
-                      <p v-if="transactionId != null"><strong>Transaction ID: </strong> {{transactionId}}</p>
+                      <p v-if="transactionId != null">
+                        <strong>Transaction ID: </strong> {{ transactionId }}
+                      </p>
                     </div>
                     <div class="col-6 text-right-align">
                       <p><strong>Date: </strong>{{ dateSelected }}</p>
@@ -135,29 +138,32 @@ export default {
                   <h6>Product List</h6>
                   <table class="table table-bordered">
                     <thead class="card-header">
-                    <tr>
-                      <th scope="col">Name</th>
-                      <th scope="col">Quantity</th>
-                      <th scope="col">Price</th>
-                      <th scope="col">Discount</th>
-                      <th scope="col">Total</th>
-                    </tr>
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Discount</th>
+                        <th scope="col">Total</th>
+                      </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="row in productTable" :key="row.product.barcode">
-                      <th scope="row">
-                        <div class="product-name">
-                          {{ row.product.product_name.name }}
-                          <div class="product-name-hover">
-                            <span><i class="bi bi-pencil-square"></i></span>
+                      <tr
+                        v-for="row in productTable"
+                        :key="row.product.barcode"
+                      >
+                        <th scope="row">
+                          <div class="product-name">
+                            {{ utils.getProductRep(row.product) }}
+                            <div class="product-name-hover">
+                              <span><i class="bi bi-pencil-square"></i></span>
+                            </div>
                           </div>
-                        </div>
-                      </th>
-                      <td>{{ row.quantity }}</td>
-                      <td>{{ row.price }}</td>
-                      <td>{{ row.discount_in_percent }}</td>
-                      <td>{{ getTotalPrice(row) }}</td>
-                    </tr>
+                        </th>
+                        <td>{{ row.quantity }}</td>
+                        <td>{{ row.price }}</td>
+                        <td>{{ row.discount_in_percent }}</td>
+                        <td>{{ getTotalPrice(row) }}</td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -166,18 +172,18 @@ export default {
                     <div class="col-6 offset-6">
                       <table class="table">
                         <tbody>
-                        <tr>
-                          <td><strong>Grand Total:</strong></td>
-                          <td>{{ grandTotal }}</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Amount Paid:</strong></td>
-                          <td>{{ paymentReceived }}</td>
-                        </tr>
-                        <tr>
-                          <td><strong>Amount Due:</strong></td>
-                          <td>{{ due }}</td>
-                        </tr>
+                          <tr>
+                            <td><strong>Grand Total:</strong></td>
+                            <td>{{ grandTotal }}</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Amount Paid:</strong></td>
+                            <td>{{ paymentReceived }}</td>
+                          </tr>
+                          <tr>
+                            <td><strong>Amount Due:</strong></td>
+                            <td>{{ due }}</td>
+                          </tr>
                         </tbody>
                       </table>
                     </div>
@@ -201,7 +207,6 @@ html {
 .customer {
   padding: 50px 0;
 }
-
 
 .customer-info-box,
 .product-info-box,
@@ -240,7 +245,7 @@ html {
   right: 0;
   visibility: hidden;
   opacity: 0;
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .product-name-hover span {

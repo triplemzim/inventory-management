@@ -1,10 +1,12 @@
 from rest_framework import serializers
 from .models import *
-from master.models import stocks
-from master.serializers import StocksSerializer, CustomerSerializer, WarehouseSerializer, SupplierSerializer, ProductSerializer
+from master.models import *
+from master.serializers import StocksSerializer, CustomerSerializer, WarehouseSerializer, SupplierSerializer, \
+    ProductSerializer
 from django.db import DatabaseError, transaction
 from django.db.models import F
 from django.http import HttpResponse
+from django.db.models import Max
 
 
 class ProductAndQuantitySerializer(serializers.ModelSerializer):
@@ -34,6 +36,7 @@ class PaymentsSerializer(serializers.ModelSerializer):
             error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
             raise serializers.ValidationError(error)
 
+
 class SaleSerializer(serializers.ModelSerializer):
     productAndQuantity = ProductAndQuantitySerializer(many=True, read_only=False)
     payment = PaymentsSerializer(many=True, read_only=False)
@@ -47,16 +50,25 @@ class SaleSerializer(serializers.ModelSerializer):
         self.fields['warehouse'] = WarehouseSerializer(read_only=True)
         return super(SaleSerializer, self).to_representation(instance)
 
-
     def create(self, validated_data):
         def updateStock(productAndQuantity, warehouseId):
-            print(productAndQuantity)
-            print(warehouseId)
-            stock = stocks.objects.filter(warehouse=warehouseId, product=productAndQuantity.product).first()
-            if stock.quantity < productAndQuantity.quantity:
-                raise DatabaseError(str(productAndQuantity.product) + ' is low in Stock. Available: ' + str(stock.quantity))
-            stock.quantity = F('quantity') - productAndQuantity.quantity
-            stock.save()
+            stockList = stocks.objects.filter(warehouse=warehouseId, product=productAndQuantity.product).exclude(
+                quantity=0).order_by('date_created')
+            quantity = productAndQuantity.quantity
+            for stock in stockList:
+                if stock.quantity >= quantity:
+                    stock.quantity = F('quantity') - quantity
+                    quantity = 0
+                    stock.save()
+                    break
+                else:
+                    quantity = quantity - stock.quantity
+                    stock.quantity = 0
+                    stock.save()
+
+            if quantity > 0:
+                raise DatabaseError(
+                    str(productAndQuantity.product) + ' is low in Stock.')
 
         try:
             with transaction.atomic():
@@ -79,6 +91,7 @@ class SaleSerializer(serializers.ModelSerializer):
             error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
             raise serializers.ValidationError(error)
 
+
 class PurchaseSerializer(serializers.ModelSerializer):
     productAndQuantity = ProductAndQuantitySerializer(many=True, read_only=False)
     p_payment = PaymentsSerializer(many=True, read_only=False)
@@ -92,14 +105,17 @@ class PurchaseSerializer(serializers.ModelSerializer):
         self.fields['warehouse'] = WarehouseSerializer(read_only=True)
         return super(PurchaseSerializer, self).to_representation(instance)
 
-
     def create(self, validated_data):
-        def updateStock(productAndQuantity, warehouseId):
-            print(productAndQuantity)
-            print(warehouseId)
-            stock = stocks.objects.filter(warehouse=warehouseId, product=productAndQuantity.product).first()
-            stock.quantity = F('quantity') + productAndQuantity.quantity
-            stock.save()
+        def getNewBatchId():
+            autoInc = auto_increments.objects.aggregate(batchId=Max('batch_id'))
+            auto_increments.objects.create(batch_id=autoInc['batchId'] + 1)
+            return format(autoInc['batchId'] + 1, '09d')
+
+        def createStock(productAndQuantity, warehouseId):
+            # print(productAndQuantity)
+            # print(warehouseId)
+            stocks.objects.create(warehouse=warehouseId, product=productAndQuantity.product, batch_id=getNewBatchId(),
+                                  expiry_date=productAndQuantity.expiry_date, quantity=productAndQuantity.quantity)
 
         try:
             with transaction.atomic():
@@ -111,7 +127,7 @@ class PurchaseSerializer(serializers.ModelSerializer):
                 for pAndQ in productAndQuantityData:
                     temp = productAndQuantity.objects.create(**pAndQ)
                     purchaseCreated.productAndQuantity.add(temp)
-                    updateStock(temp, purchaseCreated.warehouse)
+                    createStock(temp, purchaseCreated.warehouse)
 
                 for singlePayment in paymentObj:
                     temp = payments.objects.create(**singlePayment)
@@ -132,6 +148,7 @@ class TransferProductSerializer(serializers.ModelSerializer):
         self.fields['product'] = ProductSerializer(read_only=True)
         return super(TransferProductSerializer, self).to_representation(instance)
 
+
 class WarehouseTransferSerializer(serializers.ModelSerializer):
     product_list = TransferProductSerializer(many=True, read_only=False)
 
@@ -146,13 +163,38 @@ class WarehouseTransferSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         def updateStock(transferProduct, warehouseSrc, warehouseDest):
-            stock = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).first()
-            stock.quantity = F('quantity') - transferProduct.quantity
-            stock.save()
+            # stock = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).first()
+            # stock.quantity = F('quantity') - transferProduct.quantity
+            # stock.save()
+            #
+            # stock = stocks.objects.filter(warehouse=warehouseDest, product=transferProduct.product).first()
+            # stock.quantity = F('quantity') + transferProduct.quantity
+            # stock.save()
+            stockList = stocks.objects.filter(warehouse=warehouseSrc, product=transferProduct.product).exclude(
+                quantity=0)
+            remainingQuantity = transferProduct.quantity
+            for stock in stockList:
+                addedQuantity = 0
+                if stock.quantity >= remainingQuantity:
+                    addedQuantity = remainingQuantity
+                    remainingQuantity = 0
+                else:
+                    addedQuantity = stock.quantity
+                    remainingQuantity = remainingQuantity - addedQuantity
 
-            stock = stocks.objects.filter(warehouse=warehouseDest, product=transferProduct.product).first()
-            stock.quantity = F('quantity') + transferProduct.quantity
-            stock.save()
+                stock.quantity = F('quantity') - addedQuantity
+                stock.save()
+
+                stockInDest, created = stocks.objects.get_or_create(warehouse=warehouseDest,
+                                                                    product=transferProduct.product,
+                                                                    batch_id=stock.batch_id,
+                                                                    expiry_date=stock.expiry_date)
+                # stockInDest = stocks.objects.create(warehouse=warehouseDest, product=transferProduct.product,
+                #                                     batch_id=stock.batch_id)
+                stockInDest.quantity = addedQuantity
+                stockInDest.save()
+                if remainingQuantity == 0:
+                    break
 
         try:
             with transaction.atomic():
@@ -169,4 +211,3 @@ class WarehouseTransferSerializer(serializers.ModelSerializer):
         except Exception as e:
             error = {'message': ",".join(e.args) if len(e.args) > 0 else 'Unknown Error'}
             raise serializers.ValidationError(error)
-
