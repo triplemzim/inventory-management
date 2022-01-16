@@ -63,3 +63,11 @@ class BankTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = bank_transactions
         fields = '__all__'
+
+class SalesmanSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        return super(SalesmanSerializer, self).to_representation(instance)
+
+    class Meta:
+        model = m_salesman
+        exclude = ['date_created']

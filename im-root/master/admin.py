@@ -35,7 +35,12 @@ class bankAdmin(admin.ModelAdmin):
     search_fields = ['name']
 
 class autoIncrementAdmin(admin.ModelAdmin):
-    list_display = ('batch_id', 'customer_id', 'supplier_id')
+    list_display = ('batch_id', 'customer_id', 'supplier_id', 'salesman_id')
+
+class salesmanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'contact_no', 'address', 'date_joined', 'custom_id')
+    search_fields = ['name', 'contact_no', 'custom_id']
+    readonly_fields = ['custom_id', 'date_created']
 
 admin.site.register(m_brand, mBrand)
 admin.site.register(m_product, mProduct)
@@ -47,6 +52,7 @@ admin.site.register(m_bank, bankAdmin)
 admin.site.register(stocks, stocksAdmin)
 admin.site.register(bank_transactions)
 admin.site.register(auto_increments, autoIncrementAdmin)
+admin.site.register(m_salesman, salesmanAdmin)
 
 admin.site.site_header = "স্বপ্নের ঠিকানা"
 admin.site.site_title = "স্বপ্নের ঠিকানা - অ্যাডমিন সাইট"

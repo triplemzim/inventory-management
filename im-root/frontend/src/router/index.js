@@ -5,6 +5,7 @@ import Purchase from "../views/Purchase";
 import Invoice from "../views/Invoice";
 import WarehouseTransfer from "../views/WarehouseTransfer";
 import Payment from "../views/Payment";
+import Report from  "../views/report";
 
 const routes = [
   {
@@ -39,6 +40,11 @@ const routes = [
     name: "payment",
     component: Payment,
     path: "/payment/",
+  },
+  {
+    name: "report",
+    component: Report,
+    path: "/report/",
   },
   // {
   //   path: "/about",

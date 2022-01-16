@@ -2,9 +2,9 @@
 <script>
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
-import { onMounted, ref } from "vue";
-import { getStockAndExpiryWithBarcode, postPurchase } from "@/common/apis";
-import { COMPANY_NAME } from "@/common/strings";
+import {onMounted, ref} from "vue";
+import {getStockAndExpiryWithBarcode, postPurchase} from "@/common/apis";
+import {COMPANY_NAME} from "@/common/strings";
 import {
   getSupplierList,
   getProductList,
@@ -96,9 +96,9 @@ export default {
         warehouseListResponse = await getWarehouseList();
       }
       console.log(
-        componentName,
-        "api-warehouse-list",
-        warehouseListResponse.data
+          componentName,
+          "api-warehouse-list",
+          warehouseListResponse.data
       );
       warehouseList.value = warehouseListResponse.data;
       if (warehouseList.value.length > 0) {
@@ -143,7 +143,7 @@ export default {
     handleSelectSupplier: function (supplier) {
       if (supplier == null) return;
       this.selectedSupplier = this.rawSupplierList.find(
-        (x) => x.custom_id === supplier.id
+          (x) => x.custom_id === supplier.id
       );
       this.supplierName = this.selectedSupplier.name;
       this.address = this.selectedSupplier.address;
@@ -153,7 +153,7 @@ export default {
     handleSelectProduct: function (event) {
       console.log(this.componentName, event.target.value);
       const selectedProduct = this.rawProductList.find(
-        (x) => utils.getProductRep(x) === event.target.value
+          (x) => utils.getProductRep(x) === event.target.value
       );
       // if(selectedProduct == null) {
       //   selectedProduct = this.rawProductList.find(x => x.barcode === event.target.value);
@@ -168,10 +168,18 @@ export default {
       this.totalPrice = this.price;
       this.handleStock(this.barcode, this.warehouse);
     },
-    handleSelectProductWithBarcode: function (event) {
-      console.log(this.componentName, event.target.value);
+    handleSelectProductWithBarcode: async function (event) {
+      if (event.target.value.toString().trim() == '') return;
+
+      const splittedCode = event.target.value.toString().split('_');
+      this.barcode = splittedCode[0].trim();
+      let expiryString = null;
+      if (splittedCode.length > 1) {
+        expiryString = splittedCode[1].trim();
+      }
+
       const selectedProduct = this.rawProductList.find(
-        (x) => x.barcode.toString() === event.target.value.toString()
+          (x) => x.barcode.toString() === this.barcode
       );
       console.log(selectedProduct);
       if (selectedProduct == null) return;
@@ -181,13 +189,17 @@ export default {
       this.price = selectedProduct.default_purchase_price;
       this.discount = 0;
       this.totalPrice = this.price;
-      this.handleStock(this.barcode, this.warehouse);
+      await this.handleStock(this.barcode, this.warehouse);
+      if (expiryString != null) {
+        this.expiryDate = new Date(Date.parse(expiryString));
+        console.log('parsed date: ', new Date(Date.parse(expiryString)));
+      }
     },
     handleStock: async function (barcode, whouse) {
       const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
       console.log(stock.data);
       this.stockAmount = stock.data.quantity;
-      if(isNaN(Date.parse(stock.data.expiry_date))) {
+      if (isNaN(Date.parse(stock.data.expiry_date))) {
         this.expiryDate = null;
       } else {
         console.log(stock.data.expiry_date);
@@ -213,7 +225,7 @@ export default {
       console.log('warehousedate', this.dateSelected);
       row.expiryDate = this.expiryDate;
       const idx = this.productTable.findIndex(
-        (x) => x.productName === row.productName
+          (x) => x.productName === row.productName
       );
       if (idx !== -1) this.productTable.splice(idx, 1);
       if (row.quantity === 0) {
@@ -252,11 +264,11 @@ export default {
     getDateToday: function () {
       const today = new Date();
       return (
-        today.getDate() +
-        "/" +
-        (today.getMonth() + 1) +
-        "/" +
-        today.getFullYear()
+          today.getDate() +
+          "/" +
+          (today.getMonth() + 1) +
+          "/" +
+          today.getFullYear()
       );
     },
     setProductFromTable: async function (row) {
@@ -317,9 +329,9 @@ export default {
       });
       requestBody.productAndQuantity = productList;
       console.log(
-        this.componentName,
-        "purchase-payload: ",
-        JSON.stringify(requestBody)
+          this.componentName,
+          "purchase-payload: ",
+          JSON.stringify(requestBody)
       );
       const response = await postPurchase(requestBody);
       if (response.status === 201) {
@@ -347,7 +359,7 @@ export default {
     },
     deleteProduct: function () {
       const idx = this.productTable.findIndex(
-        (x) => x.barcode === this.barcode
+          (x) => x.barcode === this.barcode
       );
       if (idx !== -1) this.productTable.splice(idx, 1);
       this.resetProduct();
@@ -376,57 +388,57 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <AutoComplete
-                            :dataList="supplierList"
-                            :title="'Search Supplier'"
-                            @selectedData="handleSelectSupplier"
-                            key="supplier"
-                            :bindValue="supplierName"
+                              :dataList="supplierList"
+                              :title="'Search Supplier'"
+                              @selectedData="handleSelectSupplier"
+                              key="supplier"
+                              :bindValue="supplierName"
                           />
                         </div>
                         <div class="form-group row">
                           <label
-                            for="supplierAddress"
-                            class="col-lg-4 col-form-label"
-                            >Supplier Name</label
+                              for="supplierAddress"
+                              class="col-lg-4 col-form-label"
+                          >Supplier Name</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="text"
-                              required
-                              class="form-control"
-                              id="supplierName"
-                              v-model="supplierName"
+                                type="text"
+                                required
+                                class="form-control"
+                                id="supplierName"
+                                v-model="supplierName"
                             />
                           </div>
                         </div>
                         <div class="form-group row">
                           <label
-                            for="supplierAddress"
-                            class="col-lg-4 col-form-label"
-                            >Address</label
+                              for="supplierAddress"
+                              class="col-lg-4 col-form-label"
+                          >Address</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="text"
-                              class="form-control"
-                              id="supplierAddress"
-                              v-model="address"
+                                type="text"
+                                class="form-control"
+                                id="supplierAddress"
+                                v-model="address"
                             />
                           </div>
                         </div>
                         <div class="form-group row">
                           <label
-                            for="supplierContact"
-                            class="col-lg-4 col-form-label"
-                            >Contact</label
+                              for="supplierContact"
+                              class="col-lg-4 col-form-label"
+                          >Contact</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="text"
-                              required
-                              class="form-control"
-                              id="supplierContact"
-                              v-model="contact"
+                                type="text"
+                                required
+                                class="form-control"
+                                id="supplierContact"
+                                v-model="contact"
                             />
                           </div>
                         </div>
@@ -443,25 +455,25 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <label
-                            for="productName"
-                            class="col-lg-4 col-form-label"
-                            >Product Name</label
+                              for="productName"
+                              class="col-lg-4 col-form-label"
+                          >Product Name</label
                           >
                           <div class="col-lg-8">
                             <input
-                              class="form-control"
-                              list="datalistOptions2"
-                              id="productName"
-                              placeholder="Type to search..."
-                              v-on:input="handleSelectProduct($event)"
-                              v-bind:value="productName"
-                              autocomplete="off"
+                                class="form-control"
+                                list="datalistOptions2"
+                                id="productName"
+                                placeholder="Type to search..."
+                                v-on:input="handleSelectProduct($event)"
+                                v-bind:value="productName"
+                                autocomplete="off"
                             />
                             <datalist id="datalistOptions2">
                               <option
-                                v-for="item in productList"
-                                :key="item.id"
-                                :value="item.value"
+                                  v-for="item in productList"
+                                  :key="item.id"
+                                  :value="item.value"
                               />
                             </datalist>
                           </div>
@@ -471,44 +483,45 @@ export default {
                             <p>Product Image</p>
                           </div>
                           <div class="col-lg-8">
-                            <img src="{{ productImage }}" class="" />
+                            <img src="{{ productImage }}" class=""/>
                           </div>
                         </div>
                         <div class="row">
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="productBarcode"
-                                class="col-lg-4 col-form-label"
-                                >Barcode</label
+                                  for="productBarcode"
+                                  class="col-lg-4 col-form-label"
+                              >Barcode</label
                               >
                               <div class="col-lg-8">
                                 <input ref="barcodeInput"
-                                  @keydown.enter.prevent="
+                                       @keydown.enter.prevent="
                                     handleSelectProductWithBarcode($event)
                                   "
-                                  type="text"
-                                  class="form-control"
-                                  id="productBarcode"
-                                  v-model="barcode"
+                                       type="text"
+                                       class="form-control"
+                                       id="productBarcode"
+                                       v-model="barcode"
+                                       autocomplete="off"
                                 />
                               </div>
                             </div>
                           </div>
-                           <div class="col-lg-6">
+                          <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="expiryDate"
-                                class="col-lg-4 col-form-label"
-                                >Expiry Date</label
+                                  for="expiryDate"
+                                  class="col-lg-4 col-form-label"
+                              >Expiry Date</label
                               >
                               <div class="col-lg-8">
                                 <datepicker
-                                  class="form-control"
-                                  id="productExpiryDatepicker"
-                                  v-model="expiryDate"
-                                  inputFormat="dd-MMM-yyyy"
-                                  clearable
+                                    class="form-control"
+                                    id="productExpiryDatepicker"
+                                    v-model="expiryDate"
+                                    inputFormat="dd-MMM-yyyy"
+                                    clearable
                                 />
                               </div>
                             </div>
@@ -518,16 +531,16 @@ export default {
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="productQuantity"
-                                class="col-lg-4 col-form-label"
-                                >Quantity</label
+                                  for="productQuantity"
+                                  class="col-lg-4 col-form-label"
+                              >Quantity</label
                               >
                               <div class="col-lg-8">
                                 <input
-                                  type="number"
-                                  class="form-control"
-                                  id="productQuantity"
-                                  v-model="quantity"
+                                    type="number"
+                                    class="form-control"
+                                    id="productQuantity"
+                                    v-model="quantity"
                                 />
                               </div>
                             </div>
@@ -535,17 +548,17 @@ export default {
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="availableStock"
-                                class="col-lg-4 col-form-label"
-                                >In Stock</label
+                                  for="availableStock"
+                                  class="col-lg-4 col-form-label"
+                              >In Stock</label
                               >
                               <div class="col-lg-8">
                                 <input
-                                  type="number"
-                                  readonly
-                                  class="form-control"
-                                  id="stockAmount"
-                                  v-model="stockAmount"
+                                    type="number"
+                                    readonly
+                                    class="form-control"
+                                    id="stockAmount"
+                                    v-model="stockAmount"
                                 />
                               </div>
                             </div>
@@ -555,16 +568,16 @@ export default {
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="productPrice"
-                                class="col-lg-4 col-form-label"
-                                >Price</label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >Price</label
                               >
                               <div class="col-lg-8">
                                 <input
-                                  type="text"
-                                  class="form-control"
-                                  id="productPrice"
-                                  v-model="price"
+                                    type="text"
+                                    class="form-control"
+                                    id="productPrice"
+                                    v-model="price"
                                 />
                               </div>
                             </div>
@@ -572,16 +585,16 @@ export default {
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="productDiscount"
-                                class="col-lg-4 col-form-label"
-                                >Discount (%)</label
+                                  for="productDiscount"
+                                  class="col-lg-4 col-form-label"
+                              >Discount (%)</label
                               >
                               <div class="col-lg-8">
                                 <input
-                                  type="number"
-                                  class="form-control"
-                                  id="productDiscount"
-                                  v-model="discount"
+                                    type="number"
+                                    class="form-control"
+                                    id="productDiscount"
+                                    v-model="discount"
                                 />
                               </div>
                             </div>
@@ -589,17 +602,17 @@ export default {
                           <div class="col-lg-6">
                             <div class="form-group row">
                               <label
-                                for="productPrice"
-                                class="col-lg-4 col-form-label"
-                                >Total Price</label
+                                  for="productPrice"
+                                  class="col-lg-4 col-form-label"
+                              >Total Price</label
                               >
                               <div class="col-lg-8">
                                 <input
-                                  type="number"
-                                  class="form-control"
-                                  id="productPrice"
-                                  readonly
-                                  v-bind:value="getTotalPrice()"
+                                    type="number"
+                                    class="form-control"
+                                    id="productPrice"
+                                    readonly
+                                    v-bind:value="getTotalPrice()"
                                 />
                               </div>
                             </div>
@@ -609,17 +622,17 @@ export default {
                       <div class="card-footer">
                         <div class="product-button">
                           <button
-                            class="btn btn-danger mx-2"
-                            :disabled="barcode == null || barcode === ''"
-                            type="button"
-                            @click="deleteProduct()"
+                              class="btn btn-danger mx-2"
+                              :disabled="barcode == null || barcode === ''"
+                              type="button"
+                              @click="deleteProduct()"
                           >
                             Delete
                           </button>
                           <button
-                            class="btn btn-success"
-                            type="button"
-                            @click="addProduct()"
+                              class="btn btn-success"
+                              type="button"
+                              @click="addProduct()"
                           >
                             Add / Update
                           </button>
@@ -637,15 +650,15 @@ export default {
                       <div class="card-body">
                         <div class="form-group row">
                           <label class="col-lg-4 col-form-label"
-                            >Warehouse Name</label
+                          >Warehouse Name</label
                           >
                           <div class="col-lg-8">
                             <select class="form-select" v-model="warehouse">
                               <!--                        <option selected value="4">Warhouse One</option>-->
                               <option
-                                v-for="whouse in warehouseList"
-                                :key="whouse.id"
-                                :value="whouse.id"
+                                  v-for="whouse in warehouseList"
+                                  :key="whouse.id"
+                                  :value="whouse.id"
                               >
                                 {{ whouse.name }}
                               </option>
@@ -657,40 +670,40 @@ export default {
                         </div>
                         <div class="form-group row">
                           <label
-                            for="warehouseInvoice"
-                            class="col-lg-4 col-form-label"
-                            >Invoice No</label
+                              for="warehouseInvoice"
+                              class="col-lg-4 col-form-label"
+                          >Invoice No</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="text"
-                              required
-                              class="form-control"
-                              id="warehouseInvoice"
-                              v-model="invoiceNo"
+                                type="text"
+                                required
+                                class="form-control"
+                                id="warehouseInvoice"
+                                v-model="invoiceNo"
                             />
                           </div>
                         </div>
                         <div class="form-group row">
                           <label
-                            for="warehouseDate"
-                            class="col-lg-4 col-form-label"
-                            >Date</label
+                              for="warehouseDate"
+                              class="col-lg-4 col-form-label"
+                          >Date</label
                           >
                           <div class="col-lg-8">
-<!--                            <input-->
-<!--                              type="date"-->
-<!--                              class="form-control"-->
-<!--                              id="warehouseDatepicker"-->
-<!--                              v-model="dateSelected"-->
-<!--                              v-on:input="$event => {dateSelected = $event.target.value}"-->
-<!--                            />-->
+                            <!--                            <input-->
+                            <!--                              type="date"-->
+                            <!--                              class="form-control"-->
+                            <!--                              id="warehouseDatepicker"-->
+                            <!--                              v-model="dateSelected"-->
+                            <!--                              v-on:input="$event => {dateSelected = $event.target.value}"-->
+                            <!--                            />-->
                             <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
                           </div>
                         </div>
                         <div class="form-group row">
                           <label class="col-lg-4 col-form-label"
-                            >Payment Type</label
+                          >Payment Type</label
                           >
                           <div class="col-lg-8">
                             <select class="form-select" v-model="paymentType">
@@ -702,32 +715,32 @@ export default {
                         </div>
                         <div class="form-group row">
                           <label
-                            for="warehousePayment"
-                            class="col-lg-4 col-form-label"
-                            >Payment</label
+                              for="warehousePayment"
+                              class="col-lg-4 col-form-label"
+                          >Payment</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="number"
-                              class="form-control"
-                              id="warhousePayment"
-                              v-model="paymentReceived"
+                                type="number"
+                                class="form-control"
+                                id="warhousePayment"
+                                v-model="paymentReceived"
                             />
                           </div>
                         </div>
-                        <div class="form-group row">
+                        <div class="form-group row" v-if="paymentType != 'Cash'">
                           <label
-                            for="transactionId"
-                            class="col-lg-4 col-form-label"
-                            >Transaction ID</label
+                              for="transactionId"
+                              class="col-lg-4 col-form-label"
+                          >Transaction ID</label
                           >
                           <div class="col-lg-8">
                             <input
-                              type="text"
-                              class="form-control"
-                              id="transactionId"
-                              v-model="transactionId"
-                              :required="paymentType !== 'Cash'"
+                                type="text"
+                                class="form-control"
+                                id="transactionId"
+                                v-model="transactionId"
+                                :required="paymentType !== 'Cash'"
                             />
                           </div>
                         </div>
@@ -791,33 +804,33 @@ export default {
                   <h6>Product List</h6>
                   <table class="table table-bordered">
                     <thead class="card-header">
-                      <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Discount</th>
-                        <th scope="col">Total</th>
-                      </tr>
+                    <tr>
+                      <th scope="col">Name</th>
+                      <th scope="col">Quantity</th>
+                      <th scope="col">Price</th>
+                      <th scope="col">Discount</th>
+                      <th scope="col">Total</th>
+                    </tr>
                     </thead>
                     <tbody>
-                      <tr
+                    <tr
                         v-for="row in productTable"
                         :key="row.barcode"
                         @click="setProductFromTable(row)"
-                      >
-                        <th scope="row">
-                          <div class="product-name">
-                            {{ row.productName }}
-                            <div class="product-name-hover">
-                              <span><i class="bi bi-pencil-square"></i></span>
-                            </div>
+                    >
+                      <th scope="row">
+                        <div class="product-name">
+                          {{ row.productName }}
+                          <div class="product-name-hover">
+                            <span><i class="bi bi-pencil-square"></i></span>
                           </div>
-                        </th>
-                        <td>{{ row.quantity }}</td>
-                        <td>{{ row.price }}</td>
-                        <td>{{ row.discount }}</td>
-                        <td>{{ row.totalPrice }}</td>
-                      </tr>
+                        </div>
+                      </th>
+                      <td>{{ row.quantity }}</td>
+                      <td>{{ row.price }}</td>
+                      <td>{{ row.discount }}</td>
+                      <td>{{ row.totalPrice }}</td>
+                    </tr>
                     </tbody>
                   </table>
                 </div>
@@ -826,18 +839,18 @@ export default {
                     <div class="col-6 offset-6">
                       <table class="table">
                         <tbody>
-                          <tr>
-                            <td><strong>Grand Total:</strong></td>
-                            <td>{{ getGrandTotal() }}</td>
-                          </tr>
-                          <tr>
-                            <td><strong>Amount Paid:</strong></td>
-                            <td>{{ paymentReceived }}</td>
-                          </tr>
-                          <tr>
-                            <td><strong>Amount Due:</strong></td>
-                            <td>{{ getAmountDue() }}</td>
-                          </tr>
+                        <tr>
+                          <td><strong>Grand Total:</strong></td>
+                          <td>{{ getGrandTotal() }}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Amount Paid:</strong></td>
+                          <td>{{ paymentReceived }}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Amount Due:</strong></td>
+                          <td>{{ getAmountDue() }}</td>
+                        </tr>
                         </tbody>
                       </table>
                     </div>

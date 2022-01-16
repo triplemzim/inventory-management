@@ -152,3 +152,14 @@ export const postTransfer = async (payload) => {
     return e.response;
   }
 };
+
+export const salesmanAutocomplete = async (payload) => {
+  const endpoint = "/master/salesman-autocomplete/" + payload + "/";
+  try {
+    return await axios.get(endpoint);
+  } catch (e) {
+    console.log(e.response.data);
+    alert(JSON.stringify(e.response.data));
+    return e.response;
+  }
+};

@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from master.models import m_customer, m_product, m_warehouse, m_supplier, m_bank
+from master.models import m_customer, m_product, m_warehouse, m_supplier, m_bank, m_salesman
 import datetime
 from django.utils import timezone
 from users.models import CustomUser
@@ -61,6 +61,7 @@ class sale(models.Model):
     productAndQuantity = models.ManyToManyField('productAndQuantity', related_name='sale')
     payment = models.ManyToManyField('payments', related_name='sale')
     user = models.ForeignKey(CustomUser, null=True, blank=True, on_delete=models.SET_NULL)
+    salesman = models.ForeignKey(m_salesman, null=True, blank=True, on_delete=models.CASCADE, related_name='sale')
 
     def __str__(self):
         return self.invoice_no
@@ -78,6 +79,7 @@ class productAndQuantity(models.Model):
     discount_in_percent = models.IntegerField(default=0, null=False, blank=False, verbose_name='Discount %')
     invoice_no = models.CharField(max_length=200, blank=False, null=False)
     expiry_date = models.DateTimeField(null=True, blank=True)
+    salesman_discount = models.FloatField(default=0, null=True, blank=True, verbose_name='Salesman Discount')
 
     def __str__(self):
         return str(self.product) + '-' + str(self.quantity) + '-' + str(self.discount_in_percent) + '-' + str(

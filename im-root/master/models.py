@@ -120,24 +120,27 @@ class m_bank(models.Model):
         verbose_name = 'Bank'
         verbose_name_plural = 'Banks'
 
+
 class auto_increments(models.Model):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     batch_id = models.PositiveIntegerField(null=False, blank=False, default=1)
     customer_id = models.PositiveIntegerField(null=False, blank=False, default=1)
     supplier_id = models.PositiveIntegerField(null=False, blank=False, default=1)
+    salesman_id = models.PositiveIntegerField(null=True, blank=True, default=1)
+
 
 class stocks(models.Model):
-    def getNewBatchId():
-        autoInc = auto_increments.objects.aggregate(batchId=Max('batch_id'))
-        auto_increments.objects.create(batch_id=autoInc['batchId'] + 1)
-        return format(autoInc['batchId'] + 1, '09d')
+    # def getNewBatchId():
+    #     autoInc = auto_increments.objects.aggregate(batchId=Max('batch_id'))
+    #     auto_increments.objects.create(batch_id=autoInc['batchId'] + 1)
+    #     return format(autoInc['batchId'] + 1, '09d')
 
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
     product = models.ForeignKey(m_product, on_delete=models.CASCADE, related_name='stocks')
     warehouse = models.ForeignKey(m_warehouse, on_delete=models.CASCADE, related_name='stocks')
     quantity = models.FloatField(default=0, null=False, blank=False)
     expiry_date = models.DateTimeField(null=True, blank=True)
-    batch_id = models.CharField(max_length=15, default=getNewBatchId(), blank=False, null=False)
+    batch_id = models.CharField(max_length=15, default='GENERATING...', blank=False, null=False)
     date_created = models.DateTimeField(default=timezone.now, null=False, blank=False)
 
     def __str__(self):
@@ -168,9 +171,30 @@ class bank_transactions(models.Model):
         verbose_name_plural = 'Bank Transactions'
 
 
+class m_salesman(models.Model):
+    STATUS_CHOICE = (
+        ("ACTIVE", "ACTIVE"),
+        ("INACTIVE", "INACTIVE")
+    )
+
+    def getNewSalesmanId():
+        autoInc = auto_increments.objects.aggregate(salesmanId=Max('salesman_id'))
+        auto_increments.objects.create(salesman_id=autoInc['salesmanId'] + 1)
+        return format(autoInc['salesmanId'] + 1, '09d')
+
+    id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True, editable=False)
+    custom_id = models.CharField(max_length=15, default='GENERATING...', blank=False, null=False)
+    name = models.CharField(max_length=50, blank=False, null=False)
+    contact_no = models.CharField(max_length=15, blank=False, null=False)
+    address = models.CharField(max_length=30, blank=True, null=True)
+    date_created = models.DateTimeField(default=timezone.now, null=False, blank=False)
+    date_joined = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICE, default="ACTIVE")
+
+    class Meta:
+        verbose_name = 'Salesman'
+        verbose_name_plural = 'Salesmen'
 # class messages(models.Model):
 #     id = models.AutoField(primary_key=True)
 #     message = models.CharField(max_length=300, null=False, blank=False)
 #     priority = models.PositiveIntegerField(default=1,null=False,blank=False)
-
-

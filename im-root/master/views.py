@@ -34,6 +34,15 @@ class ProductAutocomplete(generics.ListAPIView):
             '-date_created')
 
 
+class SalesmanAutocomplete(generics.ListAPIView):
+    serializer_class = SalesmanSerializer
+
+    def get_queryset(self):
+        return m_salesman.objects.filter(Q(name__icontains=self.kwargs.get('search_string')) |
+                                         Q(contact_no__icontains=self.kwargs.get('search_string')) |
+                                         Q(custom_id__icontains=self.kwargs.get('search_string')))
+
+
 class ProductList(generics.ListAPIView):
     serializer_class = ProductSerializer
     queryset = m_product.objects.all()
@@ -78,6 +87,7 @@ class StockListProduct(generics.ListAPIView):
             return stocks.objects.filter(product=barcode).order_by('-date_created').first()
         return stocks.objects.filter(product=barcode).exclude(quantity=0)
 
+
 class StockListProductAndWarehouse(generics.ListAPIView):
     serializer_class = StocksSerializer
 
@@ -94,7 +104,8 @@ class StockListProductAndWarehouse(generics.ListAPIView):
 def getStockCount(request, barcode, warehouseId):
     if request.method == 'GET':
         returnObj = stocks.objects.filter(product=barcode, warehouse=warehouseId).aggregate(quantity=Sum('quantity'))
-        expiry = stocks.objects.filter(product=barcode, warehouse=warehouseId).exclude(quantity=0).order_by('date_created').first()
+        expiry = stocks.objects.filter(product=barcode, warehouse=warehouseId).exclude(quantity=0).order_by(
+            'date_created').first()
         if returnObj['quantity'] == 0:
             expiry = None
         else:
