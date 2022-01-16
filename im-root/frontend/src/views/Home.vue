@@ -1,6 +1,10 @@
 /* eslint-disable */
 <script>
-import {getPurchaseInvoiceList, getSaleInvoiceList, getNextOrPrevList} from '@/common/apis';
+import {
+  getPurchaseInvoiceList,
+  getSaleInvoiceList,
+  getNextOrPrevList,
+} from "@/common/apis";
 
 export default {
   data() {
@@ -9,33 +13,34 @@ export default {
       searchCount: 0,
       nextSearch: null,
       previousSearch: null,
-      radioSelected: 'sale',
-      searchText: ''
-    }
+      radioSelected: "sale",
+      searchText: "",
+    };
   },
   methods: {
     goToSales: function () {
-      this.$router.push({name: 'sales'});
+      this.$router.push({ name: "sales" });
     },
     goToPurchase: function () {
-      this.$router.push({name: 'purchase'});
+      this.$router.push({ name: "purchase" });
     },
     goToInvoice: async function (event) {
       // this.resetSearch();
       // this.searchText = '';
       this.$router.push({
-        name: 'invoice',
+        name: "invoice",
         params: {
           invoice: JSON.stringify(event),
-          type: this.radioSelected === 'sale' ? 'Sale Invoice' : 'Purchase Invoice'
-        }
+          type:
+            this.radioSelected === "sale" ? "Sale Invoice" : "Purchase Invoice",
+        },
       });
     },
     findInvoice: async function (endpoint) {
       let response = null;
       if (endpoint) {
         response = await getNextOrPrevList(endpoint);
-      } else if (this.radioSelected == 'sale') {
+      } else if (this.radioSelected == "sale") {
         response = await getSaleInvoiceList(this.searchText);
       } else {
         response = await getPurchaseInvoiceList(this.searchText);
@@ -54,13 +59,12 @@ export default {
     },
     goToWarehouseTransfer: function () {
       this.$router.push({
-        name: 'warehouseTransfer'
+        name: "warehouseTransfer",
       });
-    }
-  }
-}
+    },
+  },
+};
 </script>
-
 
 <template>
   <section class="dashboard">
@@ -71,32 +75,66 @@ export default {
             <h6 style="font-weight: bold">Search Invoice</h6>
             <div style="font-size: 13px">
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="sale"
-                       v-model="radioSelected" checked v-on:click="resetSearch">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="inlineRadioOptions"
+                  id="inlineRadio1"
+                  value="sale"
+                  v-model="radioSelected"
+                  checked
+                  v-on:click="resetSearch"
+                />
                 <label class="form-check-label" for="inlineRadio1">Sale</label>
               </div>
               <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2"
-                       value="purchase" v-model="radioSelected" v-on:click="resetSearch">
-                <label class="form-check-label" for="inlineRadio2">Purchase</label>
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="inlineRadioOptions"
+                  id="inlineRadio2"
+                  value="purchase"
+                  v-model="radioSelected"
+                  v-on:click="resetSearch"
+                />
+                <label class="form-check-label" for="inlineRadio2"
+                  >Purchase</label
+                >
               </div>
             </div>
             <div class="dashboard-search-input-box">
-              <input @keyup.enter="findInvoice()" type="search" class="form-control" placeholder="Invoice/ Phone/ Name"
-                     v-model="searchText">
-              <button type="button" @click="findInvoice" class="dashboard-search-icon">
+              <input
+                @keyup.enter="findInvoice()"
+                type="search"
+                class="form-control"
+                placeholder="Invoice/ Phone/ Name"
+                v-model="searchText"
+              />
+              <button
+                type="button"
+                @click="findInvoice"
+                class="dashboard-search-icon"
+              >
                 <i class="bi bi-search m-2"></i>
               </button>
             </div>
-            <div class="dashboard-search-result search-box" style="font-size: 11px"
-                 v-if="searchCount > 0 && searchText !== ''">
-              <div class="dashboard-search-result-box rounded" v-for="item in searchResult" :key="item.id"
-                   @click="() => goToInvoice(item)">
+            <div
+              class="dashboard-search-result search-box"
+              style="font-size: 11px"
+              v-if="searchCount > 0 && searchText !== ''"
+            >
+              <div
+                class="dashboard-search-result-box rounded"
+                v-for="item in searchResult"
+                :key="item.id"
+                @click="() => goToInvoice(item)"
+              >
                 <h6>{{ item.name }}</h6>
-                <p><b>Date:</b> {{ item.date }} -- <b>Invoice:</b> {{ item.invoice_no }} -- <b>Contact:</b>
-                  {{ item.contact }}</p>
-                <p><b>Warhouse
-                  name:</b> {{ item.warehouse.name }}</p>
+                <p>
+                  <b>Date:</b> {{ item.date }} -- <b>Invoice:</b>
+                  {{ item.invoice_no }} -- <b>Contact:</b> {{ item.contact }}
+                </p>
+                <p><b>Warhouse name:</b> {{ item.warehouse.name }}</p>
               </div>
               <!--              <div class="dashboard-search-result-box rounded">-->
               <!--                <h6>Muhim</h6>-->
@@ -109,10 +147,20 @@ export default {
               <!--                  name:</b> one</p>-->
               <!--              </div>-->
               <div class="dashboard-search-result-button">
-                <button type="button" class="btn btn-outline-secondary bi bi-arrow-left" aria-label="Close"
-                        @click="findInvoice(previousSearch)" :disabled="previousSearch === null"></button>
-                <button type="button" class="btn btn-outline-secondary bi bi-arrow-right" aria-label="Close"
-                        @click="findInvoice(nextSearch)" :disabled="nextSearch === null"></button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary bi bi-arrow-left"
+                  aria-label="Close"
+                  @click="findInvoice(previousSearch)"
+                  :disabled="previousSearch === null"
+                ></button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary bi bi-arrow-right"
+                  aria-label="Close"
+                  @click="findInvoice(nextSearch)"
+                  :disabled="nextSearch === null"
+                ></button>
               </div>
             </div>
           </div>
@@ -121,66 +169,80 @@ export default {
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image rounded">
-                    <img src="@/assets/sale.jpg" alt="">
+                    <img src="@/assets/sale.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Sales Form</h6>-->
-                    <a @click="goToSales" class="btn btn-outline-secondary">Sales</a>
+                    <a @click="goToSales" class="btn btn-outline-secondary"
+                      >Sales</a
+                    >
                   </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/purchase.jpg" alt="">
+                    <img src="@/assets/purchase.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="goToPurchase" class="btn btn-outline-secondary">Purchase</a>
+                    <a @click="goToPurchase" class="btn btn-outline-secondary"
+                      >Purchase</a
+                    >
                   </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/warehouse_transfer.jpg" alt="">
+                    <img src="@/assets/warehouse_transfer.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="goToWarehouseTransfer()" class="btn btn-outline-secondary">Warehouse Transfer</a>
+                    <a
+                      @click="goToWarehouseTransfer()"
+                      class="btn btn-outline-secondary"
+                      >Warehouse Transfer</a
+                    >
                   </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/default.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="doNothing" class="btn btn-outline-secondary">Sales Return</a>
+                    <a @click="doNothing" class="btn btn-outline-secondary"
+                      >Sales Return</a
+                    >
                   </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/default.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="doNothing" class="btn btn-outline-secondary">Purchase Return</a>
+                    <a @click="doNothing" class="btn btn-outline-secondary"
+                      >Purchase Return</a
+                    >
                   </div>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="dashboard-card-box rounded">
                   <div class="dashboard-card-box-image">
-                    <img src="@/assets/default.jpg" alt="">
+                    <img src="@/assets/default.jpg" alt="" />
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="doNothing" class="btn btn-outline-secondary">Reports</a>
+                    <a @click="doNothing" class="btn btn-outline-secondary"
+                      >Reports</a
+                    >
                   </div>
                 </div>
               </div>
@@ -309,8 +371,7 @@ export default {
   margin-bottom: 15px;
   cursor: pointer;
   border-bottom: 1px solid grey;
-  box-shadow: 0px 7px 10px -2px #E6E4E4;
-
+  box-shadow: 0px 7px 10px -2px #e6e4e4;
 }
 
 .dashboard-search-result-box p {
@@ -330,6 +391,6 @@ export default {
 }
 
 .dashboard-search-result-box:hover {
-  background: #E6E4E4;
+  background: #e6e4e4;
 }
 </style>

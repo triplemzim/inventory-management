@@ -1,18 +1,27 @@
 <template>
   <div id="nav">
-    <NavbarComponent/>
+    <NavbarComponent />
   </div>
-  <router-view :rootCustomerList="customerList" :rootSupplierList="supplierList" :rootProductList="productList"
-               :rootWarehouseList="warehouseList"/>
+  <router-view
+    :rootCustomerList="customerList"
+    :rootSupplierList="supplierList"
+    :rootProductList="productList"
+    :rootWarehouseList="warehouseList"
+  />
 </template>
 <script>
 import NavbarComponent from "@/components/Navbar";
-import {getCustomerList, getProductList, getWarehouseList, getSupplierList} from '@/common/apis';
+import {
+  getCustomerList,
+  getProductList,
+  getWarehouseList,
+  getSupplierList,
+} from "@/common/apis";
 
 export default {
   name: "App",
   components: {
-    NavbarComponent
+    NavbarComponent,
   },
   data() {
     return {
@@ -20,15 +29,15 @@ export default {
       customerList: [],
       supplierList: [],
       warehouseList: [],
-    }
+    };
   },
   async created() {
     this.customerList = await getCustomerList();
     this.supplierList = await getSupplierList();
     this.productList = await getProductList();
     this.warehouseList = await getWarehouseList();
-  }
-}
+  },
+};
 </script>
 <style>
 body {

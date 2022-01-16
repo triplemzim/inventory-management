@@ -155,7 +155,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 REGISTRATION_OPEN = False
-
+USE_TZ = True
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
@@ -164,5 +164,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    "DATE_INPUT_FORMATS": ["%d/%m/%Y"]
+    "DATE_INPUT_FORMATS": ["%d/%m/%Y"],
+    "DATETIME_FORMAT": "%Y-%m-%d %H:%M:%S.%fZ",
 }

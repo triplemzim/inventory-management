@@ -13,5 +13,8 @@ urlpatterns = [
     path('bank-list/', views.BankList.as_view(), name='bank_list'),
     path('stocks-list/', views.StocksList.as_view(), name='stocks_list'),
     path('stocks-list/<str:barcode>/', views.StockListProduct.as_view(), name='stock_list_product'),
+    path('stocks-list/<str:barcode>/<str:warehouse>/', views.StockListProductAndWarehouse.as_view(), name='stock_list_product_warehouse'),
+    path('stock-count/<str:barcode>/<str:warehouseId>/', views.getStockCount, name='stock_count'),
     path('bank-transactions-list/', views.BankTransactionsList.as_view(), name='bank_transactions_list'),
+    path('salesman-autocomplete/<str:search_string>/', views.SalesmanAutocomplete.as_view(), name='salesman_autocomplete'),
 ]
