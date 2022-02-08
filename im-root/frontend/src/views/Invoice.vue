@@ -67,13 +67,16 @@ export default {
 
     this.warehouse = data.warehouse.name;
     this.invoiceNo = data.invoice_no;
-    this.dateSelected = new Date(Date.parse(data.date)).toLocaleDateString();
+    this.dateSelected = new Date(Date.parse(data.date));
     this.productTable = data.productAndQuantity;
   },
   methods: {
     getTotalPrice: function (row) {
       let priceNoDic = row.price * row.quantity;
       return priceNoDic - (priceNoDic * row.discount_in_percent) / 100.0;
+    },
+    printInvoice: async function () {
+      await this.$htmlToPaper("invoiceToPrint");
     },
     // getGrandTotal: function () {
     //   let sum = 0;
@@ -92,7 +95,12 @@ export default {
       <div class="container">
         <div class="row">
           <div class="offset-0 col-12 offset-sm-2 col-sm-8">
-            <div class="invoice-information">
+            <div class="report-print-button text-right">
+              <button class="btn btn-outline-danger" @click="printInvoice()">
+                Print
+              </button>
+            </div>
+            <div id="invoiceToPrint" class="invoice-information">
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h5>{{ COMPANY_NAME }}</h5>

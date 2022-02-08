@@ -17,8 +17,6 @@ export default {
     Datepicker,
   },
   data() {
-    const today = new Date();
-
     return {
       warehouseTransfers: [],
       transferCount: 0,
@@ -29,12 +27,7 @@ export default {
       barcode: null,
       toWarehouse: null,
       fromWarehouse: null,
-      dateSelected:
-        today.getDate() +
-        "/" +
-        (today.getMonth() + 1) +
-        "/" +
-        today.getFullYear(),
+      dateSelected: new Date(),
       comment: null,
       productList: [],
       warehouseList: [],
@@ -169,6 +162,7 @@ export default {
       const response = await postTransfer(requestBody);
       if (response.status === 201) {
         alert("Transfer Record Complete!");
+        await this.printInvoice();
         this.resetAll();
       }
     },
@@ -212,6 +206,9 @@ export default {
       );
       if (idx !== -1) this.productTable.splice(idx, 1);
       this.resetProduct();
+    },
+    printInvoice: async function () {
+      await this.$htmlToPaper("invoiceToPrint");
     },
   },
 };
@@ -547,22 +544,14 @@ export default {
               </form>
             </div>
           </div>
-          <div class="col-lg-6">
-            <div class="invoice-information">
-              <div class="row">
-                <div class="col-lg-6" style="margin: auto">
-                  <h5>Invoice</h5>
-                </div>
-                <div class="col-lg-6">
-                  <button
-                    class="btn btn-outline-primary mb-2"
-                    style="float: right"
-                    type="button"
-                  >
-                    Print
-                  </button>
-                </div>
-              </div>
+          <div class="col-6">
+            <div class="report-print-button text-right">
+              <button class="btn btn-outline-danger" @click="printInvoice()">
+                Print
+              </button>
+            </div>
+            <div id="invoiceToPrint" class="invoice-information">
+              <h5>Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h5>{{ COMPANY_NAME }}</h5>
@@ -570,30 +559,30 @@ export default {
                 </div>
                 <div class="invoice-info">
                   <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p>
                         <strong>Source Warehouse: </strong>
                         {{ getWarehouseNameFromId(fromWarehouse) }}
                       </p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p></p>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p>
                         <strong>Destination Warehouse: </strong>
                         {{ getWarehouseNameFromId(toWarehouse) }}
                       </p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p></p>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p><strong>Date: </strong> {{ dateSelected }}</p>
                     </div>
-                    <div class="col-lg-6 text-right-align"></div>
+                    <div class="col-6 text-right-align"></div>
                   </div>
                 </div>
                 <div class="invoice-table">
