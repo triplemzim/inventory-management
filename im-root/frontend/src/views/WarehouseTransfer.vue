@@ -69,7 +69,7 @@ export default {
     if (this.rootWarehouseList.data == null) {
       const response = await getWarehouseList();
       this.warehouseList = response.data;
-      console.log(this.componentName, 'warehouseList', response.data);
+      console.log(this.componentName, "warehouseList", response.data);
     } else {
       this.warehouseList = this.rootWarehouseList.data;
     }
@@ -105,16 +105,16 @@ export default {
       const stock = await getStockAndExpiryWithBarcode(barcode, whouse);
       console.log(stock.data);
       this.stockAmount = stock.data.quantity;
-      if(isNaN(Date.parse(stock.data.expiry_date))) {
-        this.expiryDate = '';
+      if (isNaN(Date.parse(stock.data.expiry_date))) {
+        this.expiryDate = "";
       } else {
         this.expiryDate = new Date(Date.parse(stock.data.expiry_date));
       }
       this.$refs.barcodeInput.focus();
     },
     addProduct: function () {
-      if(this.quantity > this.stockAmount) {
-        alert('Product low in stock!');
+      if (this.quantity > this.stockAmount) {
+        alert("Product low in stock!");
         return;
       }
       const row = {};
@@ -137,7 +137,7 @@ export default {
       this.quantity = 0;
       this.barcode = "";
       this.stockAmount = null;
-      this.expiryDate = '';
+      this.expiryDate = "";
       this.$refs.barcodeInput.focus();
     },
     submitTransfer: async function () {
@@ -271,7 +271,8 @@ export default {
                                 >Barcode</label
                               >
                               <div class="col-lg-8">
-                                <input ref="barcodeInput"
+                                <input
+                                  ref="barcodeInput"
                                   @keydown.enter.prevent="
                                     handleSelectProductWithBarcode($event)
                                   "
@@ -400,7 +401,11 @@ export default {
                             >Date</label
                           >
                           <div class="col-lg-8">
-                            <datepicker v-model="dateSelected" class="form-control" inputFormat="dd-MMM-yyyy"/>
+                            <datepicker
+                              v-model="dateSelected"
+                              class="form-control"
+                              inputFormat="dd-MMM-yyyy"
+                            />
                           </div>
                         </div>
                         <div class="form-group row">

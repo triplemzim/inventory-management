@@ -5,7 +5,7 @@ import Purchase from "../views/Purchase";
 import Invoice from "../views/Invoice";
 import WarehouseTransfer from "../views/WarehouseTransfer";
 import Payment from "../views/Payment";
-import Report from  "../views/report";
+import Report from "../views/report";
 
 const routes = [
   {
