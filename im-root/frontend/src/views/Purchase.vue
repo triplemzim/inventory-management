@@ -335,6 +335,7 @@ export default {
       const response = await postPurchase(requestBody);
       if (response.status === 201) {
         alert("Purchase Record Complete!");
+        await this.printInvoice();
         this.resetAll();
       }
     },
@@ -362,6 +363,9 @@ export default {
       );
       if (idx !== -1) this.productTable.splice(idx, 1);
       this.resetProduct();
+    },
+    printInvoice: async function () {
+      await this.$htmlToPaper("invoiceToPrint");
     },
   },
 };
@@ -761,8 +765,13 @@ export default {
               </form>
             </div>
           </div>
-          <div class="col-lg-6">
-            <div class="invoice-information">
+          <div class="col-6">
+            <div class="report-print-button text-right">
+              <button class="btn btn-outline-danger" @click="printInvoice()">
+                Print
+              </button>
+            </div>
+            <div id="invoiceToPrint" class="invoice-information">
               <h5>Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
@@ -771,30 +780,30 @@ export default {
                 </div>
                 <div class="invoice-info">
                   <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p><strong>Supplier Name:</strong> {{ supplierName }}</p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p><strong>Invoice Number:</strong> {{ invoiceNo }}</p>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p><strong>Address:</strong> {{ address }}</p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p><strong>Contact No:</strong> [Contact_No]</p>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p><strong>Contact:</strong> {{ contact }}</p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p><strong>Invoice Type:</strong> Supplier</p>
                     </div>
-                    <div class="col-lg-6">
+                    <div class="col-6">
                       <p><strong>Paid By:</strong> {{ paymentType }}</p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p><strong>Address:</strong> Bogra Sadar</p>
                     </div>
                     <div class="col-6">
@@ -802,7 +811,7 @@ export default {
                         <strong>Transaction ID: </strong> {{ transactionId }}
                       </p>
                     </div>
-                    <div class="col-lg-6 text-right-align">
+                    <div class="col-6 text-right-align">
                       <p><strong>Date:</strong>{{ dateSelected }}</p>
                     </div>
                   </div>
