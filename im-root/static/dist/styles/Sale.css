@@ -1,0 +1,126 @@
+body,
+html {
+  height: 100%;
+  font-size: 12px;
+}
+
+.customer {
+  padding: 50px 0;
+}
+
+.customer-info-box,
+.product-info-box,
+.invoice-info-box,
+.warehouse-info-box {
+  padding: 5px;
+  border: 1px solid #dfdfdf;
+  box-shadow: 0 0 3px 0px #e9e9e9;
+  border-radius: 5px;
+  /*font-size: 11px;*/
+}
+
+.customer-info-box .form-group,
+.product-info-box .form-group,
+.warehouse-info-box .form-group {
+  margin-bottom: 10px;
+}
+
+.customer-info-box .form-group label {
+  font-weight: 500;
+}
+
+.product-information,
+.warehouse-information {
+  margin-top: 20px;
+}
+
+.product-name {
+  position: relative;
+  cursor: pointer;
+}
+
+.product-name-hover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.3s;
+}
+
+.product-name-hover span {
+  display: inline-block;
+}
+
+.product-name:hover .product-name-hover {
+  visibility: visible;
+  opacity: 1;
+}
+
+.product-image {
+  margin-bottom: 10px;
+}
+
+.customer .fixed-top {
+  top: 50px !important;
+}
+
+@media (max-width: 992px) {
+  .invoice-information {
+    margin-top: 20px;
+  }
+}
+
+.invoice-table tr:hover {
+  background: #f0f0f0;
+}
+
+.invoice-heading h4 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.product-button {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sell-submit-btn {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invoice-info p {
+  margin-bottom: 5px;
+}
+
+.invoice-info {
+  margin-bottom: 20px;
+}
+
+#ui-datepicker-div {
+  z-index: 10000 !important;
+}
+
+.col-form-label {
+  font-size: 14px;
+}
+
+.invoice-info p {
+  font-size: 13px;
+}
+
+.text-right-align {
+  text-align: right;
+}
+
+.invoice-heading {
+  text-align: center;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+.col-form-label {
+  font-size: 12px;
+}
