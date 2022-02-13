@@ -1,151 +1,131 @@
 <script>
 // @ is an alias to /src
 // import AutoComplete from "@/components/AutoComplete";
-import { onMounted, ref } from "vue";
 import { COMPANY_NAME } from "@/common/strings";
 import {
-  getCustomerList,
-  getProductList,
   getWarehouseList,
   postSale,
   getStockAndExpiryWithBarcode,
   salesmanAutocomplete,
+  getSaleInvoiceList,
+  getNextOrPrevList,
 } from "@/common/apis";
 import utils from "@/common/util";
 import Datepicker from "vue3-datepicker";
 
 export default {
-  name: "Sale",
   props: ["rootCustomerList", "rootProductList", "rootWarehouseList"],
   components: {
     // AutoComplete
     Datepicker,
   },
-  setup(props) {
-    const customerList = ref(null);
-    const rawCustomerList = ref(null);
-    const rawProductList = ref(null);
-    const selectedCustomer = ref("");
-    const componentName = ":sale:";
-    const productList = ref(null);
-    const address = ref(null);
-    const contact = ref(null);
-    const barcode = ref(null);
-    const quantity = ref(null);
-    const price = ref(null);
-    const discount = ref(null);
-    const totalPrice = ref(null);
-    const warehouse = ref("1");
-    const invoiceNo = ref(null);
-    const dateSelected = ref(null);
-    const due = ref(null);
-    const invoiceData = ref([]);
-    const productName = ref(null);
-    const customerName = ref(null);
-    const paymentReceived = ref(null);
-    const productImage = ref(null);
-    const warehouseList = ref(null);
-    const productTable = ref(null);
-    const paymentType = ref(null);
-    const transactionId = ref(null);
-    const stockAmount = ref(null);
-    const expiryDate = ref(null);
-    const salesman = ref(null);
-    const salesmanList = ref(null);
-    const salesDiscount = ref(null);
-    const salesDiscountInPercent = ref(null);
-    const salesmanId = ref(null);
-
-    paymentType.value = "Cash";
-    productTable.value = [];
-    dateSelected.value = new Date();
-    salesman.value = "";
-
-    onMounted(async () => {
-      const returnData = [];
-      // const jq = window.jQuery;
-      // jq("#warhouseDatepicker").datepicker({dateFormat: 'dd/mm/yy'});
-
-      // Customer list
-      let responseCustomer = props.rootCustomerList;
-      if (responseCustomer == null || responseCustomer.data == null) {
-        responseCustomer = await getCustomerList();
-      }
-      console.log(componentName, "props-customer-list", responseCustomer);
-      responseCustomer.data.forEach((customer) => {
-        const temp = {};
-        temp.value = customer.name;
-        temp.id = customer.custom_id;
-        returnData.push(temp);
-      });
-      rawCustomerList.value = responseCustomer.data;
-      customerList.value = returnData;
-
-      //Product-List
-      const productData = [];
-      let anotherResponse = props.rootProductList;
-      if (anotherResponse == null || anotherResponse.data == null) {
-        anotherResponse = await getProductList();
-      }
-      console.log(componentName, "props-product-list", anotherResponse.data);
-      anotherResponse.data.forEach((product) => {
-        const temp = {};
-        temp.value = utils.getProductRep(product);
-        temp.id = product.barcode;
-        productData.push(temp);
-      });
-      rawProductList.value = anotherResponse.data;
-      productList.value = productData;
-
-      //Warehouse-list
-      let warehouseListResponse = props.rootWarehouseList;
-      if (warehouseListResponse == null || warehouseListResponse.data == null) {
-        warehouseListResponse = await getWarehouseList();
-      }
-      console.log(componentName, "warehouse-list", warehouseListResponse.data);
-      warehouseList.value = warehouseListResponse.data;
-      if (warehouseList.value.length > 0) {
-        warehouse.value = warehouseList.value[0].id;
-      }
-    });
-
+  data: function () {
     return {
-      customerList,
-      selectedCustomer,
-      componentName,
-      COMPANY_NAME,
-      productList,
-      address,
-      contact,
-      barcode,
-      quantity,
-      price,
-      discount,
-      totalPrice,
-      warehouse,
-      invoiceNo,
-      dateSelected,
-      due,
-      invoiceData,
-      productName,
-      customerName,
-      paymentReceived,
-      productImage,
-      warehouseList,
-      rawProductList,
-      rawCustomerList,
-      productTable,
-      paymentType,
-      transactionId,
-      stockAmount,
-      utils,
-      expiryDate,
-      salesman,
-      salesmanId,
-      salesmanList,
-      salesDiscountInPercent,
-      salesDiscount,
+      companyName: COMPANY_NAME,
+      customerList: null,
+      rawCustomerList: null,
+      rawProductList: null,
+      selectedCustomer: "",
+      componentName: ":salesReturn:",
+      productList: null,
+      address: null,
+      contact: null,
+      barcode: null,
+      quantity: null,
+      price: null,
+      discount: null,
+      totalPrice: null,
+      warehouse: "1",
+      invoiceNo: null,
+      dateSelected: null,
+      due: null,
+      invoiceData: [],
+      productName: null,
+      customerName: null,
+      paymentReceived: null,
+      productImage: null,
+      warehouseList: null,
+      productTable: [],
+      paymentType: null,
+      transactionId: null,
+      stockAmount: null,
+      expiryDate: null,
+      salesman: null,
+      salesmanList: null,
+      salesDiscount: null,
+      salesDiscountInPercent: null,
+      salesmanId: null,
+      searchResult: [],
+      searchCount: null,
+      nextSearch: null,
+      previousSearch: null,
+      radioSelected: "sale",
+      searchText: "",
+      grandTotal: 0,
+
+      //New Vars
+
+      allAvailableProducts: [],
+      selectedInvoice: null,
+      selectedProductId: "",
+      selectedInvoiceNo: "",
     };
+  },
+  mounted: async function () {
+    let warehouseListResponse = this.rootWarehouseList;
+    if (warehouseListResponse == null || warehouseListResponse.data == null) {
+      warehouseListResponse = await getWarehouseList();
+    }
+    console.log(
+      this.componentName,
+      "warehouse-list",
+      warehouseListResponse.data
+    );
+    this.warehouseList = warehouseListResponse.data;
+    if (this.warehouseList.length > 0) {
+      this.warehouse = this.warehouseList[0].id;
+    }
+  },
+  computed: {
+    productCanBeDeleted: function () {
+      const idx = this.productTable.findIndex(
+        (x) => x.barcode === this.barcode
+      );
+      if (idx !== -1) return true;
+      return false;
+    },
+    maxQuantity: function () {
+      const totalPurchased = this.allAvailableProducts.find(
+        (entry) => entry.product.barcode == this.barcode
+      );
+      if (totalPurchased) {
+        const addedToInvoice = this.productTable.find(
+          (entry) => (entry.barcode = this.barcode)
+        );
+        if (addedToInvoice) {
+          return totalPurchased.quantity - addedToInvoice.quantity;
+        }
+        return totalPurchased.quantity;
+      }
+      return 0;
+    },
+  },
+  watch: {
+    selectedProductId(id) {
+      const item = this.allAvailableProducts.find(
+        (entry) => entry.product.id == id
+      );
+      if (item) {
+        this.setProductFromInvoice(item);
+      } else {
+        this.resetProduct();
+      }
+    },
+    quantity(new_value, old_value) {
+      if (new_value > this.maxQuantity) {
+        this.quantity = old_value;
+      }
+    },
   },
   methods: {
     handleSelectCustomer: function (customer) {
@@ -163,9 +143,6 @@ export default {
       const selectedProduct = this.rawProductList.find(
         (x) => utils.getProductRep(x) === event.target.value
       );
-      // if(selectedProduct == null) {
-      //   selectedProduct = this.rawProductList.find(x => x.barcode === event.target.value);
-      // }
       if (selectedProduct == null) return;
       this.productName = utils.getProductRep(selectedProduct);
       this.productImage = selectedProduct.photo;
@@ -242,6 +219,7 @@ export default {
       this.paymentReceived = this.getGrandTotal();
 
       this.resetProduct();
+      this.selectedProductId = "";
     },
     getGrandTotal: function () {
       let gt = 0;
@@ -271,6 +249,7 @@ export default {
       this.expiryDate = null;
       this.$refs.barcodeInput.focus();
       this.salesDiscountInPercent = 0;
+      this.salesDiscount = 0;
     },
     getDateToday: function () {
       const today = new Date();
@@ -283,6 +262,9 @@ export default {
       );
     },
     setProductFromTable: function (row) {
+      this.selectedProductId = this.allAvailableProducts.find(
+        (entry) => entry.product.barcode == row.barcode
+      ).product.id;
       this.productName = row.productName;
       this.quantity = row.quantity;
       this.discount = row.discount;
@@ -344,11 +326,15 @@ export default {
         "sale-payload: ",
         JSON.stringify(requestBody)
       );
-      const response = await postSale(requestBody);
+      const response = await postSale(requestBody); // Write down the Api for sales return
       if (response.status === 201) {
         alert("Sale Record Complete!");
         await this.printInvoice();
         this.resetAll();
+        this.allAvailableProducts = [];
+        this.selectedInvoice = null;
+        this.selectedProductId = "";
+        this.selectedInvoiceNo = "";
       }
     },
     resetAll: function () {
@@ -375,6 +361,7 @@ export default {
       );
       if (idx !== -1) this.productTable.splice(idx, 1);
       this.resetProduct();
+      this.selectedProductId = "";
     },
     handleSalesmanInput: async function (event) {
       if (event.target.value == "") {
@@ -404,6 +391,52 @@ export default {
     printInvoice: async function () {
       await this.$htmlToPaper("invoiceToPrint");
     },
+
+    // Invoice methods
+    goToInvoice: async function (event) {
+      this.resetAll();
+      this.selectedInvoiceNo = event.invoice_no;
+      this.selectedProductId = "";
+      this.selectedInvoice = event;
+      this.allAvailableProducts = event.productAndQuantity;
+      this.customerName = event.customer.name;
+      this.address = event.customer.address;
+      this.contact = event.customer.contact;
+    },
+    findInvoice: async function (endpoint) {
+      let response = null;
+      if (endpoint) {
+        response = await getNextOrPrevList(endpoint);
+      } else {
+        response = await getSaleInvoiceList(this.searchText);
+      }
+      console.log("response for findInvoice", response);
+
+      this.searchCount = response.data.count;
+      this.searchResult = response.data.results;
+      this.nextSearch = response.data.next;
+      this.previousSearch = response.data.previous;
+
+      console.log("search count", this.searchCount);
+    },
+    totalPriceForSingleProduct: function (row) {
+      let priceNoDic = row.price * row.quantity;
+      return priceNoDic - (priceNoDic * row.discount_in_percent) / 100.0;
+    },
+    setProductFromInvoice: function (row) {
+      this.resetProduct();
+      console.log("hello world", row);
+      this.productName = row.product.name;
+      this.quantity = row.quantity;
+      this.discount = row.discount;
+      this.price = row.price;
+      this.barcode = row.product.barcode;
+      this.handleStock(this.barcode, this.warehouse);
+      this.discount = row.discount_in_percent;
+      this.salesDiscount = row.salesman_discount;
+      this.salesDiscountInPercent =
+        (this.salesDiscount * 100) / this.getTotalPrice();
+    },
   },
 };
 </script>
@@ -411,106 +444,73 @@ export default {
 <template>
   <div class="containerRoot" id="home">
     <h3 class="col-lg text-center mt-3" style="font-weight: bold">
-      <span>Sales</span>
+      <span>Sales Return</span>
     </h3>
     <section class="customer">
       <div class="container">
         <div class="row">
           <div class="col-lg-6">
+            <div class="dashboard-search">
+              <h6 style="font-weight: bold">Search Invoice</h6>
+              <div class="dashboard-search-input-box">
+                <input
+                  @keyup.enter="findInvoice()"
+                  type="search"
+                  class="form-control"
+                  placeholder="Invoice/ Phone/ Name"
+                  v-model="searchText"
+                />
+                <button
+                  type="button"
+                  @click="findInvoice()"
+                  class="dashboard-search-icon"
+                >
+                  <i class="bi bi-search m-2"></i>
+                </button>
+              </div>
+              <div
+                class="dashboard-search-result search-box"
+                style="font-size: 11px"
+                v-if="searchCount > 0 && searchText !== ''"
+              >
+                <div
+                  class="dashboard-search-result-box rounded"
+                  v-for="item in searchResult"
+                  :key="item.id"
+                  @click="() => goToInvoice(item)"
+                >
+                  <h6>{{ item.name }}</h6>
+                  <p>
+                    <b>Date:</b> {{ item.date }} -- <b>Invoice:</b>
+                    {{ item.invoice_no }} -- <b>Contact:</b> {{ item.contact }}
+                  </p>
+                  <p><b>Warhouse name:</b> {{ item.warehouse.name }}</p>
+                </div>
+                <div class="dashboard-search-result-button">
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary bi bi-arrow-left"
+                    aria-label="Close"
+                    @click="findInvoice(previousSearch)"
+                    :disabled="previousSearch === null"
+                  ></button>
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary bi bi-arrow-right"
+                    aria-label="Close"
+                    @click="findInvoice(nextSearch)"
+                    :disabled="nextSearch === null"
+                  ></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p v-if="selectedInvoiceNo">Invoice No {{ selectedInvoiceNo }}</p>
+        <div class="row">
+          <div class="col-lg-6">
             <div class="sticky-top">
               <form @submit.prevent="submitSale">
-                <div class="customer-information">
-                  <div class="customer-info-box">
-                    <div class="card">
-                      <div class="card-header">
-                        <h5>Customer</h5>
-                      </div>
-                      <div class="card-body">
-                        <div class="form-group row">
-                          <AutoComplete
-                            :dataList="customerList"
-                            :title="'Search Customer'"
-                            @selectedData="handleSelectCustomer"
-                            key="customer"
-                            :bindValue="customerName"
-                          />
-                        </div>
-                        <div class="form-group row">
-                          <label
-                            for="customerAddress"
-                            class="col-lg-4 col-form-label"
-                            >Customer Name</label
-                          >
-                          <div class="col-lg-8">
-                            <input
-                              type="text"
-                              required
-                              class="form-control"
-                              id="customerName"
-                              v-model="customerName"
-                            />
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label
-                            for="customerAddress"
-                            class="col-lg-4 col-form-label"
-                            >Address</label
-                          >
-                          <div class="col-lg-8">
-                            <input
-                              type="text"
-                              class="form-control"
-                              id="customerAddress"
-                              v-model="address"
-                            />
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label
-                            for="customerContact"
-                            class="col-lg-4 col-form-label"
-                            >Contact</label
-                          >
-                          <div class="col-lg-8">
-                            <input
-                              type="text"
-                              required
-                              class="form-control"
-                              id="customerContact"
-                              v-model="contact"
-                            />
-                          </div>
-                        </div>
-                        <div class="form-group row">
-                          <label
-                            for="productName"
-                            class="col-lg-4 col-form-label"
-                            >Salesman</label
-                          >
-                          <div class="col-lg-8">
-                            <input
-                              class="form-control"
-                              list="datalistOptions3"
-                              id="Salesman"
-                              placeholder="Type to search..."
-                              v-on:input="handleSalesmanInput($event)"
-                              v-bind:value="salesman"
-                              autocomplete="off"
-                            />
-                            <datalist id="datalistOptions3">
-                              <option
-                                v-for="item in salesmanList"
-                                :key="item.custom_id"
-                                :value="utils.getSalesmanRep(item)"
-                              />
-                            </datalist>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div class="product-information">
                   <div class="product-info-box">
                     <div class="card">
@@ -519,28 +519,22 @@ export default {
                       </div>
                       <div class="card-body">
                         <div class="form-group row">
-                          <label
-                            for="productName"
-                            class="col-lg-4 col-form-label"
-                            >Product Name</label
-                          >
+                          <label class="col-lg-4 col-form-label">Product</label>
                           <div class="col-lg-8">
-                            <input
-                              class="form-control"
-                              list="datalistOptions2"
-                              id="productName"
-                              placeholder="Type to search..."
-                              v-on:input="handleSelectProduct($event)"
-                              v-bind:value="productName"
-                              autocomplete="off"
-                            />
-                            <datalist id="datalistOptions2">
+                            <select
+                              class="form-select"
+                              v-model="selectedProductId"
+                              :disabled="allAvailableProducts.length == 0"
+                            >
+                              <option value="">Select a product</option>
                               <option
-                                v-for="item in productList"
-                                :key="item.id"
-                                :value="item.value"
-                              />
-                            </datalist>
+                                v-for="item in allAvailableProducts"
+                                :key="item.product.id"
+                                :value="item.product.id"
+                              >
+                                {{ item.product.name }}
+                              </option>
+                            </select>
                           </div>
                         </div>
                         <div class="row product-image">
@@ -611,6 +605,8 @@ export default {
                                   type="number"
                                   class="form-control"
                                   id="productQuantity"
+                                  min="0"
+                                  :max="maxQuantity"
                                   v-model="quantity"
                                 />
                               </div>
@@ -733,6 +729,7 @@ export default {
                       <div class="card-footer">
                         <div class="product-button">
                           <button
+                            v-if="productCanBeDeleted"
                             class="btn btn-danger mx-2"
                             :disabled="barcode == null || barcode === ''"
                             type="button"
@@ -765,7 +762,6 @@ export default {
                           >
                           <div class="col-lg-8">
                             <select class="form-select" v-model="warehouse">
-                              <!--                        <option selected value="4">Warhouse One</option>-->
                               <option
                                 v-for="whouse in warehouseList"
                                 :key="whouse.id"
@@ -773,9 +769,6 @@ export default {
                               >
                                 {{ whouse.name }}
                               </option>
-                              <!--                        <option value="1">Warhouse Two</option>-->
-                              <!--                        <option value="2">Warhouse Three</option>-->
-                              <!--                        <option value="3">Warhouse Four</option>-->
                             </select>
                           </div>
                         </div>
@@ -873,7 +866,7 @@ export default {
               </button>
             </div>
             <div id="invoiceToPrint" class="invoice-information">
-              <h5>Invoice</h5>
+              <h5>Return Invoice</h5>
               <div class="invoice-info-box">
                 <div class="invoice-heading card-header">
                   <h5>{{ COMPANY_NAME }}</h5>
@@ -1117,5 +1110,123 @@ html {
 
 .col-form-label {
   font-size: 12px;
+}
+
+.dashboard {
+  padding: 50px 0;
+}
+
+.dashboard-card-box-image img {
+  width: 100%;
+  object-fit: cover;
+  height: 100%;
+  padding: 8px;
+  padding-bottom: 0px;
+}
+
+.dashboard-card-box {
+  box-shadow: 0px 7px 10px -2px #afafaf;
+  margin-bottom: 40px;
+  width: 90%;
+  /*border-radius: 5%;*/
+}
+
+.dashboard-card-box-body {
+  padding: 10px 5px;
+}
+
+.dashboard-right {
+  border: 1px solid #ccc;
+  padding: 10px;
+  max-height: 540px;
+  overflow-y: scroll;
+  font-size: 13px;
+}
+
+.dashboard-right-box {
+  border: 1px solid #f1f1f1;
+  padding: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 2px 2px #e9e9e9;
+  border-radius: 5px;
+}
+
+.dashboard-right-box p {
+  margin-bottom: 0;
+}
+
+.dashboard-search {
+  margin-bottom: 30px;
+}
+
+.dashboard-search-input-box {
+  width: 99%;
+  position: relative;
+  padding-right: 12px;
+}
+
+.dashboard-search-icon {
+  position: absolute;
+  display: inline-block;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+}
+
+.dashboard-search-input-box input {
+  padding-right: 40px;
+}
+
+.dashboard-card-box-body .btn {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.dashboard-card-box-image {
+  height: 108px;
+}
+
+.dashboard-right {
+  margin-left: 30px;
+}
+
+.dashboard-right-box > h6 {
+  font-weight: bold;
+}
+
+.dashboard-search-result {
+  border: 1px solid #ccc;
+  padding: 10px;
+  /*background: #F3F2F2;*/
+}
+
+.dashboard-search-result-box {
+  padding: 5px;
+  margin-bottom: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid grey;
+  box-shadow: 0px 7px 10px -2px #e6e4e4;
+}
+
+.dashboard-search-result-box p {
+  margin-bottom: 2px;
+}
+
+.dashboard-search-result-box h6 {
+  margin-bottom: 0;
+}
+
+.dashboard-search-result-button {
+  text-align: right;
+}
+
+.search-box {
+  width: 97%;
+}
+
+.dashboard-search-result-box:hover {
+  background: #e6e4e4;
 }
 </style>
