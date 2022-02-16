@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import Sale from "../views/Sale";
+import SalesReturn from "../views/SalesReturn";
 import Purchase from "../views/Purchase";
 import Invoice from "../views/Invoice";
 import WarehouseTransfer from "../views/WarehouseTransfer";
@@ -45,6 +46,11 @@ const routes = [
     name: "report",
     component: Report,
     path: "/report/",
+  },
+  {
+    path: "/sales-return/",
+    name: "salesReturn",
+    component: SalesReturn,
   },
   // {
   //   path: "/about",

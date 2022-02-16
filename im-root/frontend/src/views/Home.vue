@@ -21,6 +21,9 @@ export default {
     goToSales: function () {
       this.$router.push({ name: "sales" });
     },
+    goToSalesReturn: function () {
+      this.$router.push({ name: "salesReturn" });
+    },
     goToPurchase: function () {
       this.$router.push({ name: "purchase" });
     },
@@ -214,7 +217,7 @@ export default {
                   </div>
                   <div class="dashboard-card-box-body">
                     <!--                    <h6>Card Heading</h6>-->
-                    <a @click="doNothing" class="btn btn-outline-secondary"
+                    <a @click="goToSalesReturn" class="btn btn-outline-secondary"
                       >Sales Return</a
                     >
                   </div>
